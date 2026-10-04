@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
-import type { Card, Direction } from '../types';
+import type { Card, Direction, Outcome } from '../types';
 import { Flashcard } from './Flashcard';
 import { getWordById } from '../data/words';
 
 interface StudyModeProps {
   cards: Card[];
   direction: Direction;
-  // Missed cards go back to the end of the queue until every card was answered correctly
+  // Cards not answered correctly go back to the end of the queue until every card was
   repeatUntilCorrect?: boolean;
-  onCardComplete: (wordId: string, quality: number, userAnswer: string, correct: boolean) => void;
+  onCardComplete: (wordId: string, outcome: Outcome, userAnswer: string) => void;
   // All cards done (for repeatUntilCorrect: all correct)
   onComplete?: () => void;
   onFinish: () => void;
@@ -81,10 +81,10 @@ export const StudyMode: React.FC<StudyModeProps> = ({
     );
   }
 
-  const handleCardComplete = (quality: number, userAnswer: string, correct: boolean) => {
-    onCardComplete(currentCard.wordId, quality, userAnswer, correct);
+  const handleCardComplete = (outcome: Outcome, again: boolean, userAnswer: string) => {
+    onCardComplete(currentCard.wordId, outcome, userAnswer);
 
-    const retry = repeatUntilCorrect && !correct;
+    const retry = again || (repeatUntilCorrect && outcome !== 'correct');
     const nextQueue = retry ? [...rest, currentCard] : rest;
     setAttempt((a) => a + 1);
 

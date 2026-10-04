@@ -11,7 +11,7 @@ import {
   type DailyTask,
 } from './lib/dailyTask';
 import { getWordIds, getWordsByCategory } from './data/words';
-import type { Card, Direction } from './types';
+import type { Card, Direction, Outcome } from './types';
 
 const DIRECTION_KEY = 'studyDirection';
 
@@ -96,19 +96,19 @@ function App() {
     startSession(taskCards, true);
   };
 
-  const handleCardComplete = (
-    wordId: string,
-    quality: number,
-    userAnswer: string,
-    correct: boolean
-  ) => {
+  const handleCardComplete = (wordId: string, outcome: Outcome, userAnswer: string) => {
+    // Only flipped, nothing typed: doesn't count for stats or spaced repetition
+    if (outcome === 'skipped') return;
+
     // Daily task: only the first answer per word on the first run feeds spaced repetition;
     // retries and repeat runs are practice
     if (session?.daily) {
       if (dailyTask?.completed || recordedInSession.current.has(wordId)) return;
       recordedInSession.current.add(wordId);
     }
-    recordProgress(wordId, quality, userAnswer, correct);
+    const correct = outcome === 'correct';
+    // SM-2 quality: 4 = recalled, 1 = failed
+    recordProgress(wordId, correct ? 4 : 1, userAnswer, correct);
   };
 
   const handleDailyComplete = () => {

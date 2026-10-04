@@ -85,3 +85,9 @@ export interface StudySession {
  * Study direction: which language is shown on the front of the card
  */
 export type Direction = 'de-pt' | 'pt-de';
+
+/**
+ * Result of answering a card: typed answers are correct or wrong; a card that was
+ * only flipped (nothing typed) is skipped and doesn't count either way
+ */
+export type Outcome = 'correct' | 'wrong' | 'skipped';

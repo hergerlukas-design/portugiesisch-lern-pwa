@@ -1,16 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
-import type { Direction, Word } from '../types';
+import type { Direction, Outcome, Word } from '../types';
 
 interface FlashcardProps {
   word: Word;
   direction: Direction;
-  // correct: typed answer matched, or (when nothing was typed) a passing self-rating
-  onSubmit: (quality: number, userAnswer: string, correct: boolean) => void;
+  // again: the user asked to see this card again later in the session
+  onSubmit: (outcome: Outcome, again: boolean, userAnswer: string) => void;
 }
-
-// SM-2 quality: "Nochmal" is a failed recall, "Weiter" a good one
-const QUALITY_AGAIN = 1;
-const QUALITY_GOOD = 4;
 
 export const Flashcard: React.FC<FlashcardProps> = ({ word, direction, onSubmit }) => {
   const [flipped, setFlipped] = useState(false);
@@ -32,6 +28,8 @@ export const Flashcard: React.FC<FlashcardProps> = ({ word, direction, onSubmit 
 
   const typed = userAnswer.trim() !== '';
   const correct = userAnswer.toLowerCase().trim() === answer.toLowerCase().trim();
+  // Only a typed answer counts; just flipping the card is neutral
+  const outcome: Outcome = !typed ? 'skipped' : correct ? 'correct' : 'wrong';
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -115,16 +113,13 @@ export const Flashcard: React.FC<FlashcardProps> = ({ word, direction, onSubmit 
       ) : (
         <div className="grid grid-cols-2 gap-2">
           <button
-            onClick={() => onSubmit(QUALITY_AGAIN, userAnswer, false)}
+            onClick={() => onSubmit(outcome, true, userAnswer)}
             className="py-3 rounded-lg border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800 text-red-600 dark:text-red-400 font-medium transition-colors"
           >
             Nochmal
           </button>
           <button
-            // A wrong typed answer still counts as missed, so "Weiter" doesn't hide it
-            onClick={() =>
-              onSubmit(typed && !correct ? QUALITY_AGAIN : QUALITY_GOOD, userAnswer, !typed || correct)
-            }
+            onClick={() => onSubmit(outcome, false, userAnswer)}
             className="py-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium transition-colors"
           >
             Weiter
