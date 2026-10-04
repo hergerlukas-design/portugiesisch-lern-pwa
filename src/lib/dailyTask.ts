@@ -1,11 +1,14 @@
-import type { Card, Level } from '../types';
+import type { Card, Direction, Level } from '../types';
 
 export const DAILY_TASK_SIZE = 10;
 
-const DAILY_TASK_KEY = 'dailyTask';
+// DE → PT keeps the original key so existing tasks carry over
+const taskKey = (direction: Direction) =>
+  direction === 'de-pt' ? 'dailyTask' : `dailyTask:${direction}`;
 
 export interface DailyTask {
   date: string; // local date, YYYY-MM-DD
+  direction: Direction;
   wordIds: string[];
   // Each level can complete the same words once
   completedLevels: Level[];
@@ -42,7 +45,7 @@ function pickWords(cards: Card[]): string[] {
 
 function save(task: DailyTask) {
   try {
-    localStorage.setItem(DAILY_TASK_KEY, JSON.stringify(task));
+    localStorage.setItem(taskKey(task.direction), JSON.stringify(task));
   } catch {
     // Task just won't survive a reload
   }
@@ -51,10 +54,10 @@ function save(task: DailyTask) {
 /**
  * Today's task, created from the current cards if there is none for today yet
  */
-export function getOrCreateDailyTask(cards: Card[]): DailyTask | null {
+export function getOrCreateDailyTask(cards: Card[], direction: Direction): DailyTask | null {
   const today = todayString();
   try {
-    const stored = localStorage.getItem(DAILY_TASK_KEY);
+    const stored = localStorage.getItem(taskKey(direction));
     if (stored) {
       const task = JSON.parse(stored) as DailyTask & { completed?: boolean };
       if (task.date === today && task.wordIds.length > 0) {
@@ -62,7 +65,7 @@ export function getOrCreateDailyTask(cards: Card[]): DailyTask | null {
         if (!Array.isArray(task.completedLevels)) {
           task.completedLevels = task.completed ? ['beginner'] : [];
         }
-        return { date: task.date, wordIds: task.wordIds, completedLevels: task.completedLevels };
+        return { date: task.date, direction, wordIds: task.wordIds, completedLevels: task.completedLevels };
       }
     }
   } catch {
@@ -71,7 +74,7 @@ export function getOrCreateDailyTask(cards: Card[]): DailyTask | null {
 
   const wordIds = pickWords(cards);
   if (wordIds.length === 0) return null;
-  const task: DailyTask = { date: today, wordIds, completedLevels: [] };
+  const task: DailyTask = { date: today, direction, wordIds, completedLevels: [] };
   save(task);
   return task;
 }

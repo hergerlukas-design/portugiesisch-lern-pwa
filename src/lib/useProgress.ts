@@ -1,15 +1,21 @@
-import { useState, useEffect, useCallback } from 'react';
-import type { Card, Progress, Stats } from '../types';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import type { Card, Direction, Progress, Stats } from '../types';
 import { initializeCard, calculateSM2, getCardStatus } from './sm2';
 
 const CARDS_KEY = 'portugiesisch_cards';
 const PROGRESS_KEY = 'portugiesisch_progress';
 
 /**
- * Custom hook for managing card progress with LocalStorage persistence
+ * Custom hook for managing card progress with LocalStorage persistence.
+ * Cards and stats are scoped to one study direction; each direction keeps its own schedule.
  */
-export function useProgress() {
-  const [cards, setCards] = useState<Card[]>([]);
+export function useProgress(direction: Direction) {
+  // Cards of both directions, as stored
+  const [allCards, setAllCards] = useState<Card[]>([]);
+  const cards = useMemo(
+    () => allCards.filter((card) => card.direction === direction),
+    [allCards, direction]
+  );
   const [isLoaded, setIsLoaded] = useState(false);
 
   // Load cards from localStorage on mount
@@ -21,10 +27,12 @@ export function useProgress() {
         // Convert date strings back to Date objects
         const restored = parsed.map((card: any) => ({
           ...card,
+          // Cards from before directions were tracked belong to DE → PT
+          direction: card.direction ?? 'de-pt',
           nextReviewDate: new Date(card.nextReviewDate),
           lastReviewDate: card.lastReviewDate ? new Date(card.lastReviewDate) : undefined,
         }));
-        setCards(restored);
+        setAllCards(restored);
       } catch (error) {
         console.error('Failed to load cards:', error);
       }
@@ -35,12 +43,12 @@ export function useProgress() {
   // Save cards to localStorage whenever they change
   useEffect(() => {
     if (isLoaded) {
-      localStorage.setItem(CARDS_KEY, JSON.stringify(cards));
+      localStorage.setItem(CARDS_KEY, JSON.stringify(allCards));
     }
-  }, [cards, isLoaded]);
+  }, [allCards, isLoaded]);
 
   /**
-   * Initialize cards for a set of words
+   * Initialize cards for a set of words in the current direction
    */
   const initializeCards = useCallback((wordIds: string[]) => {
     const now = new Date();
@@ -48,6 +56,7 @@ export function useProgress() {
       const sm2State = initializeCard();
       return {
         wordId,
+        direction,
         interval: sm2State.interval,
         easeFactor: sm2State.easeFactor,
         repetitions: sm2State.repetitions,
@@ -55,16 +64,18 @@ export function useProgress() {
         status: 'new',
       };
     });
-    setCards(newCards);
-  }, []);
+    setAllCards((prev) => [...prev.filter((card) => card.direction !== direction), ...newCards]);
+  }, [direction]);
 
   /**
    * Record a study attempt and update SM-2 metrics
    */
   const recordProgress = useCallback(
     (wordId: string, quality: number, userAnswer: string, correct: boolean) => {
-      setCards((prevCards) => {
-        const cardIndex = prevCards.findIndex((c) => c.wordId === wordId);
+      setAllCards((prevCards) => {
+        const cardIndex = prevCards.findIndex(
+          (c) => c.wordId === wordId && c.direction === direction
+        );
         if (cardIndex === -1) return prevCards;
 
         const card = prevCards[cardIndex];
@@ -102,10 +113,11 @@ export function useProgress() {
         timestamp: new Date(),
         userAnswer,
         correct,
+        direction,
       };
       saveProgressEntry(progress);
     },
-    []
+    [direction]
   );
 
   /**
@@ -130,7 +142,9 @@ export function useProgress() {
     const reviewingCards = cards.filter((c) => c.status === 'reviewing').length;
     const masteredCards = cards.filter((c) => c.status === 'mastered').length;
 
-    const progressEntries = getProgressHistory();
+    const progressEntries = getProgressHistory().filter(
+      (p) => (p.direction ?? 'de-pt') === direction
+    );
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -173,13 +187,13 @@ export function useProgress() {
       accuracy: Math.round(accuracy),
       streak,
     };
-  }, [cards]);
+  }, [cards, direction]);
 
   /**
    * Reset all progress (for testing or restart)
    */
   const resetAllProgress = useCallback(() => {
-    setCards([]);
+    setAllCards([]);
     localStorage.removeItem(CARDS_KEY);
     localStorage.removeItem(PROGRESS_KEY);
   }, []);

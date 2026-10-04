@@ -17,6 +17,8 @@ export interface Word {
  */
 export interface Card {
   wordId: string;
+  // Each word has one card per direction, scheduled independently
+  direction: Direction;
   interval: number; // days until next review
   easeFactor: number; // SM-2 ease factor (1.3 - 2.5)
   repetitions: number; // number of successful repetitions
@@ -35,6 +37,7 @@ export interface Progress {
   timestamp: Date;
   userAnswer: string;
   correct: boolean;
+  direction?: Direction; // missing on entries from before directions were tracked: de-pt
 }
 
 /**

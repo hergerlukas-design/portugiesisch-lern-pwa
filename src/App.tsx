@@ -85,7 +85,7 @@ function App() {
     getCardsForReview,
     getStats,
     resetAllProgress,
-  } = useProgress();
+  } = useProgress(direction);
 
   // Initialize cards when app loads
   useEffect(() => {
@@ -100,10 +100,11 @@ function App() {
 
   // Pick (or restore) today's task once the cards exist
   useEffect(() => {
-    if (cards.length > 0 && !dailyTask) {
-      setDailyTask(getOrCreateDailyTask(cards));
+    // One task per direction; switching direction loads (or creates) that one
+    if (dailyTask?.direction !== direction) {
+      setDailyTask(cards.length > 0 ? getOrCreateDailyTask(cards, direction) : null);
     }
-  }, [cards, dailyTask]);
+  }, [cards, dailyTask, direction]);
 
   const startSession = (sessionCards: Card[], daily: boolean, sessionLevel: Level = level) => {
     recordedInSession.current = new Set();
@@ -252,7 +253,10 @@ function App() {
         )}
 
         {currentMode === 'stats' && (
-          <StatsComponent stats={stats} />
+          <div className="space-y-10">
+            <DirectionToggle direction={direction} onDirectionChange={handleDirectionChange} />
+            <StatsComponent stats={stats} />
+          </div>
         )}
 
         {currentMode === 'settings' && (
