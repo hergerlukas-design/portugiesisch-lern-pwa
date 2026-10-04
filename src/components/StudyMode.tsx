@@ -15,20 +15,14 @@ export const StudyMode: React.FC<StudyModeProps> = ({
   onFinish,
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [sessionStats, setSessionStats] = useState({
-    correct: 0,
-    total: 0,
-  });
 
   if (cards.length === 0) {
     return (
-      <div className="w-full max-w-2xl mx-auto text-center py-12">
-        <p className="text-xl text-gray-600 dark:text-gray-400 mb-6">
-          Keine Karten zum Lernen verfügbar
-        </p>
+      <div className="text-center py-16">
+        <p className="text-gray-500 dark:text-gray-400 mb-6">Keine Karten zum Lernen verfügbar</p>
         <button
           onClick={onFinish}
-          className="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition-colors"
+          className="px-5 py-2.5 rounded-lg bg-gray-100 dark:bg-slate-800 font-medium"
         >
           Zurück
         </button>
@@ -41,119 +35,43 @@ export const StudyMode: React.FC<StudyModeProps> = ({
 
   if (!word) {
     return (
-      <div className="w-full max-w-2xl mx-auto text-center py-12">
-        <p className="text-xl text-red-600 dark:text-red-400">
-          Wort nicht gefunden
-        </p>
-      </div>
+      <p className="text-center py-16 text-red-600 dark:text-red-400">Wort nicht gefunden</p>
     );
   }
 
   const handleCardComplete = (quality: number, userAnswer: string) => {
-    const correct =
-      userAnswer.toLowerCase().trim() ===
-      word.portuguese.toLowerCase().trim();
-
     onCardComplete(currentCard.wordId, quality, userAnswer);
 
-    setSessionStats({
-      correct: sessionStats.correct + (correct ? 1 : 0),
-      total: sessionStats.total + 1,
-    });
-
-    // Move to next card or finish
     if (currentIndex < cards.length - 1) {
       setCurrentIndex(currentIndex + 1);
     } else {
-      // Show finish screen
-      setTimeout(() => {
-        onFinish();
-      }, 500);
+      onFinish();
     }
   };
 
-  const accuracy =
-    sessionStats.total > 0
-      ? Math.round((sessionStats.correct / sessionStats.total) * 100)
-      : 0;
-
   return (
-    <div className="w-full space-y-8">
-      {/* Progress bar */}
-      <div className="max-w-2xl mx-auto w-full">
-        <div className="flex justify-between items-center mb-2">
-          <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-            Fortschritt
-          </p>
-          <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-            {currentIndex + 1} / {cards.length}
-          </p>
-        </div>
-        <div className="w-full h-2 bg-gray-200 dark:bg-slate-700 rounded-full overflow-hidden">
-          <div
-            className="h-full bg-blue-500 transition-all duration-300"
-            style={{
-              width: `${((currentIndex + 1) / cards.length) * 100}%`,
-            }}
-          />
-        </div>
-      </div>
-
-      {/* Session statistics */}
-      {sessionStats.total > 0 && (
-        <div className="max-w-2xl mx-auto w-full grid grid-cols-3 gap-4">
-          <div className="p-4 rounded-lg bg-gray-50 dark:bg-slate-800 text-center">
-            <p className="text-sm text-gray-600 dark:text-gray-400">Richtig</p>
-            <p className="text-2xl font-bold text-green-600 dark:text-green-400">
-              {sessionStats.correct}
-            </p>
-          </div>
-          <div className="p-4 rounded-lg bg-gray-50 dark:bg-slate-800 text-center">
-            <p className="text-sm text-gray-600 dark:text-gray-400">Falsch</p>
-            <p className="text-2xl font-bold text-red-600 dark:text-red-400">
-              {sessionStats.total - sessionStats.correct}
-            </p>
-          </div>
-          <div className="p-4 rounded-lg bg-gray-50 dark:bg-slate-800 text-center">
-            <p className="text-sm text-gray-600 dark:text-gray-400">Genauigkeit</p>
-            <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-              {accuracy}%
-            </p>
-          </div>
-        </div>
-      )}
-
-      {/* Flashcard */}
-      <Flashcard
-        word={word}
-        card={currentCard}
-        onSubmit={handleCardComplete}
-      />
-
-      {/* Navigation buttons */}
-      <div className="max-w-2xl mx-auto w-full flex gap-4">
-        <button
-          onClick={() => {
-            if (currentIndex > 0) setCurrentIndex(currentIndex - 1);
-          }}
-          disabled={currentIndex === 0}
-          className="flex-1 px-4 py-3 bg-gray-300 dark:bg-slate-700 hover:bg-gray-400 dark:hover:bg-slate-600 disabled:bg-gray-200 dark:disabled:bg-slate-800 text-gray-900 dark:text-white font-semibold rounded-lg transition-colors"
-        >
-          ← Zurück
-        </button>
+    <div className="space-y-6">
+      {/* Progress */}
+      <div className="flex items-center gap-3">
         <button
           onClick={onFinish}
-          className="flex-1 px-4 py-3 bg-gray-500 hover:bg-gray-600 text-white font-semibold rounded-lg transition-colors"
+          aria-label="Beenden"
+          className="w-8 h-8 -ml-1 flex items-center justify-center rounded-md text-xl text-gray-400 hover:text-gray-900 dark:hover:text-white"
         >
-          Beenden
+          ×
         </button>
-        <button
-          disabled
-          className="flex-1 px-4 py-3 bg-gray-300 dark:bg-slate-700 text-gray-900 dark:text-white font-semibold rounded-lg opacity-50 cursor-not-allowed"
-        >
-          Weiter →
-        </button>
+        <div className="flex-1 h-1.5 bg-gray-100 dark:bg-slate-800 rounded-full overflow-hidden">
+          <div
+            className="h-full bg-blue-500 transition-all duration-300"
+            style={{ width: `${(currentIndex / cards.length) * 100}%` }}
+          />
+        </div>
+        <span className="text-sm tabular-nums text-gray-500 dark:text-gray-400">
+          {currentIndex + 1}/{cards.length}
+        </span>
       </div>
+
+      <Flashcard key={currentCard.wordId} word={word} onSubmit={handleCardComplete} />
     </div>
   );
 };
