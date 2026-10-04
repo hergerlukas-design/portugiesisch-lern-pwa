@@ -14,6 +14,16 @@
     <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%232f653e' width='192' height='192'/><text x='50%' y='50%' font-size='100' font-weight='bold' fill='white' text-anchor='middle' dy='.3em'>📚</text></svg>" />
     <link rel="manifest" href="/manifest.json" />
 
+    <script>
+      // Apply the saved theme before first paint to avoid a light/dark flash
+      try {
+        var t = localStorage.getItem('theme');
+        if (t === 'dark' || (t !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.documentElement.classList.add('dark');
+        }
+      } catch (e) {}
+    </script>
+
     <title>Portugiesisch Lernen PWA</title>
   </head>
   <body>

@@ -96,3 +96,8 @@ export type Outcome = 'correct' | 'wrong' | 'skipped';
  * Answer mode: beginners pick from 4 options, advanced learners type the answer
  */
 export type Level = 'beginner' | 'advanced';
+
+/**
+ * Color scheme: follow the device, or force light/dark
+ */
+export type Theme = 'system' | 'light' | 'dark';

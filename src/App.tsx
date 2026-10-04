@@ -6,13 +6,14 @@ import { StudyMode } from './components/StudyMode';
 import { StatsComponent } from './components/Stats';
 import { Settings } from './components/Settings';
 import { useProgress } from './lib/useProgress';
+import { applyTheme, loadTheme, saveTheme } from './lib/theme';
 import {
   getOrCreateDailyTask,
   markDailyTaskCompleted,
   type DailyTask,
 } from './lib/dailyTask';
 import { getWordIds, getWordsByCategory } from './data/words';
-import type { Card, Direction, Level, Outcome } from './types';
+import type { Card, Direction, Level, Outcome, Theme } from './types';
 
 const DIRECTION_KEY = 'studyDirection';
 const LEVEL_KEY = 'studyLevel';
@@ -53,6 +54,15 @@ function App() {
   const handleDirectionChange = (newDirection: Direction) => {
     setDirection(newDirection);
     saveSetting(DIRECTION_KEY, newDirection);
+  };
+
+  const [theme, setTheme] = useState<Theme>(loadTheme);
+
+  useEffect(() => applyTheme(theme), [theme]);
+
+  const handleThemeChange = (newTheme: Theme) => {
+    setTheme(newTheme);
+    saveTheme(newTheme);
   };
 
   const handleLevelChange = (newLevel: Level) => {
@@ -217,7 +227,13 @@ function App() {
         )}
 
         {currentMode === 'settings' && (
-          <Settings level={level} onLevelChange={handleLevelChange} onReset={resetAllProgress} />
+          <Settings
+            level={level}
+            onLevelChange={handleLevelChange}
+            theme={theme}
+            onThemeChange={handleThemeChange}
+            onReset={resetAllProgress}
+          />
         )}
       </main>
     </div>

@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import type { Level } from '../types';
+import type { Level, Theme } from '../types';
 import { Segmented } from './Segmented';
 
 interface SettingsProps {
   level: Level;
   onLevelChange: (level: Level) => void;
+  theme: Theme;
+  onThemeChange: (theme: Theme) => void;
   onReset: () => void;
 }
 
@@ -13,7 +15,19 @@ const LEVELS: { id: Level; label: string }[] = [
   { id: 'advanced', label: 'Fortgeschritten' },
 ];
 
-export const Settings: React.FC<SettingsProps> = ({ level, onLevelChange, onReset }) => {
+const THEMES: { id: Theme; label: string }[] = [
+  { id: 'system', label: 'System' },
+  { id: 'light', label: 'Hell' },
+  { id: 'dark', label: 'Dunkel' },
+];
+
+export const Settings: React.FC<SettingsProps> = ({
+  level,
+  onLevelChange,
+  theme,
+  onThemeChange,
+  onReset,
+}) => {
   const [updating, setUpdating] = useState(false);
 
   // Fetch the latest service worker and reload; pages load network-first, so the
@@ -45,6 +59,11 @@ export const Settings: React.FC<SettingsProps> = ({ level, onLevelChange, onRese
         <p className="mt-2 text-xs text-stone-500 dark:text-gray-400">
           {level === 'beginner' ? '4 Antworten zur Auswahl' : 'Antwort selbst eintippen'}
         </p>
+      </div>
+
+      <div>
+        <p className="text-sm text-stone-500 dark:text-gray-400 mb-3">Darstellung</p>
+        <Segmented options={THEMES} value={theme} onChange={onThemeChange} />
       </div>
 
       <button
