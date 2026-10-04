@@ -91,3 +91,8 @@ export type Direction = 'de-pt' | 'pt-de';
  * only flipped (nothing typed) is skipped and doesn't count either way
  */
 export type Outcome = 'correct' | 'wrong' | 'skipped';
+
+/**
+ * Answer mode: beginners pick from 4 options, advanced learners type the answer
+ */
+export type Level = 'beginner' | 'advanced';

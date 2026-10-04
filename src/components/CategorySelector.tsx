@@ -1,4 +1,5 @@
 import React from 'react';
+import { Segmented } from './Segmented';
 
 type Category = 'all' | 'top100' | 'top500' | 'top1000';
 
@@ -17,24 +18,8 @@ const CATEGORIES: { id: Category; label: string }[] = [
 export const CategorySelector: React.FC<CategorySelectorProps> = ({
   selectedCategory,
   onCategoryChange,
-}) => {
-  return (
-    <div className="grid grid-cols-4 gap-1 p-1 rounded-lg bg-gray-100 dark:bg-slate-800">
-      {CATEGORIES.map((cat) => (
-        <button
-          key={cat.id}
-          onClick={() => onCategoryChange(cat.id)}
-          className={`py-2 rounded-md text-sm transition-colors ${
-            selectedCategory === cat.id
-              ? 'bg-white dark:bg-slate-700 text-gray-900 dark:text-white font-medium shadow-sm'
-              : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-          }`}
-        >
-          {cat.label}
-        </button>
-      ))}
-    </div>
-  );
-};
+}) => (
+  <Segmented options={CATEGORIES} value={selectedCategory} onChange={onCategoryChange} />
+);
 
 export default CategorySelector;

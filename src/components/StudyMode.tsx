@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import type { Card, Direction, Outcome } from '../types';
+import type { Card, Direction, Level, Outcome } from '../types';
 import { Flashcard } from './Flashcard';
 import { getWordById } from '../data/words';
 
 interface StudyModeProps {
   cards: Card[];
   direction: Direction;
+  level: Level;
   // Cards not answered correctly go back to the end of the queue until every card was
   repeatUntilCorrect?: boolean;
   onCardComplete: (wordId: string, outcome: Outcome, userAnswer: string) => void;
@@ -17,6 +18,7 @@ interface StudyModeProps {
 export const StudyMode: React.FC<StudyModeProps> = ({
   cards,
   direction,
+  level,
   repeatUntilCorrect = false,
   onCardComplete,
   onComplete,
@@ -129,6 +131,7 @@ export const StudyMode: React.FC<StudyModeProps> = ({
         key={attempt}
         word={word}
         direction={direction}
+        level={level}
         onSubmit={handleCardComplete}
       />
     </div>

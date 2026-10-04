@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Navigation } from './components/Navigation';
 import { CategorySelector } from './components/CategorySelector';
 import { DirectionToggle } from './components/DirectionToggle';
+import { Segmented } from './components/Segmented';
 import { StudyMode } from './components/StudyMode';
 import { StatsComponent } from './components/Stats';
 import { useProgress } from './lib/useProgress';
@@ -11,15 +12,31 @@ import {
   type DailyTask,
 } from './lib/dailyTask';
 import { getWordIds, getWordsByCategory } from './data/words';
-import type { Card, Direction, Outcome } from './types';
+import type { Card, Direction, Level, Outcome } from './types';
 
 const DIRECTION_KEY = 'studyDirection';
+const LEVEL_KEY = 'studyLevel';
 
-function loadDirection(): Direction {
+const LEVELS: { id: Level; label: string }[] = [
+  { id: 'beginner', label: 'Anfänger' },
+  { id: 'advanced', label: 'Fortgeschritten' },
+];
+
+// Saved choice if it is one of `allowed`, else the first allowed value
+function loadSetting<T extends string>(key: string, allowed: T[]): T {
   try {
-    return localStorage.getItem(DIRECTION_KEY) === 'pt-de' ? 'pt-de' : 'de-pt';
+    const stored = localStorage.getItem(key);
+    return allowed.find((value) => value === stored) ?? allowed[0];
   } catch {
-    return 'de-pt';
+    return allowed[0];
+  }
+}
+
+function saveSetting(key: string, value: string) {
+  try {
+    localStorage.setItem(key, value);
+  } catch {
+    // Preference just won't persist
   }
 }
 
@@ -31,15 +48,21 @@ function App() {
   const [dailyTask, setDailyTask] = useState<DailyTask | null>(null);
   // Words already recorded in this daily session (only the first answer counts for SM-2)
   const recordedInSession = useRef(new Set<string>());
-  const [direction, setDirection] = useState<Direction>(loadDirection);
+  const [direction, setDirection] = useState<Direction>(() =>
+    loadSetting<Direction>(DIRECTION_KEY, ['de-pt', 'pt-de'])
+  );
+  const [level, setLevel] = useState<Level>(() =>
+    loadSetting<Level>(LEVEL_KEY, ['beginner', 'advanced'])
+  );
 
   const handleDirectionChange = (newDirection: Direction) => {
     setDirection(newDirection);
-    try {
-      localStorage.setItem(DIRECTION_KEY, newDirection);
-    } catch {
-      // Preference just won't persist
-    }
+    saveSetting(DIRECTION_KEY, newDirection);
+  };
+
+  const handleLevelChange = (newLevel: Level) => {
+    setLevel(newLevel);
+    saveSetting(LEVEL_KEY, newLevel);
   };
 
   const {
@@ -166,6 +189,8 @@ function App() {
               <p className="mt-1 text-gray-500 dark:text-gray-400">fällig</p>
             </div>
 
+            <Segmented options={LEVELS} value={level} onChange={handleLevelChange} />
+
             <CategorySelector
               selectedCategory={selectedCategory}
               onCategoryChange={setSelectedCategory}
@@ -186,6 +211,7 @@ function App() {
           <StudyMode
             cards={session.cards}
             direction={direction}
+            level={level}
             repeatUntilCorrect={session.daily}
             onCardComplete={handleCardComplete}
             onComplete={handleDailyComplete}

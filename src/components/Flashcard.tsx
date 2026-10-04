@@ -1,18 +1,23 @@
 import React, { useState, useRef, useEffect } from 'react';
-import type { Direction, Outcome, Word } from '../types';
+import type { Direction, Level, Outcome, Word } from '../types';
+import { buildChoices } from '../lib/choices';
 
 interface FlashcardProps {
   word: Word;
   direction: Direction;
+  // beginner: pick from 4 options; advanced: type the answer
+  level: Level;
   // again: the user asked to see this card again later in the session
   onSubmit: (outcome: Outcome, again: boolean, userAnswer: string) => void;
 }
 
-export const Flashcard: React.FC<FlashcardProps> = ({ word, direction, onSubmit }) => {
+export const Flashcard: React.FC<FlashcardProps> = ({ word, direction, level, onSubmit }) => {
   const [flipped, setFlipped] = useState(false);
   // Once the answer has been seen, the card can be flipped back and forth freely
   const [revealed, setRevealed] = useState(false);
   const [userAnswer, setUserAnswer] = useState('');
+  const [chosen, setChosen] = useState<string | null>(null);
+  const [choices] = useState(() => (level === 'beginner' ? buildChoices(word, direction) : []));
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -26,10 +31,31 @@ export const Flashcard: React.FC<FlashcardProps> = ({ word, direction, onSubmit 
   const promptExample = word.exampleSentence?.[ptFirst ? 'portuguese' : 'german'];
   const answerExample = word.exampleSentence?.[ptFirst ? 'german' : 'portuguese'];
 
-  const typed = userAnswer.trim() !== '';
-  const correct = userAnswer.toLowerCase().trim() === answer.toLowerCase().trim();
-  // Only a typed answer counts; just flipping the card is neutral
-  const outcome: Outcome = !typed ? 'skipped' : correct ? 'correct' : 'wrong';
+  // The user's own answer: the picked option (beginner) or the typed text (advanced)
+  const given = level === 'beginner' ? (chosen ?? '') : userAnswer;
+  const answered = given.trim() !== '';
+  const correct = given.toLowerCase().trim() === answer.toLowerCase().trim();
+  // Only an actual answer counts; just flipping the card is neutral
+  const outcome: Outcome = !answered ? 'skipped' : correct ? 'correct' : 'wrong';
+
+  const choose = (option: string) => {
+    setChosen(option);
+    setFlipped(true);
+    setRevealed(true);
+  };
+
+  const choiceClass = (option: string) => {
+    if (!revealed) {
+      return 'border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800';
+    }
+    if (option === answer) {
+      return 'border-green-500 bg-green-50 dark:bg-green-950/40 text-green-700 dark:text-green-300';
+    }
+    if (option === chosen) {
+      return 'border-red-500 bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300';
+    }
+    return 'border-gray-200 dark:border-slate-700 opacity-40';
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -76,13 +102,13 @@ export const Flashcard: React.FC<FlashcardProps> = ({ word, direction, onSubmit 
               {answerExample && (
                 <p className="mt-4 text-sm text-gray-500 dark:text-gray-400 italic">{answerExample}</p>
               )}
-              {typed && (
+              {answered && (
                 <p
                   className={`mt-6 text-sm font-medium ${
                     correct ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
                   }`}
                 >
-                  {correct ? '✓ Richtig' : `✗ Deine Antwort: ${userAnswer}`}
+                  {correct ? '✓ Richtig' : `✗ Deine Antwort: ${given}`}
                 </p>
               )}
             </div>
@@ -90,7 +116,23 @@ export const Flashcard: React.FC<FlashcardProps> = ({ word, direction, onSubmit 
         </div>
       </button>
 
+      {level === 'beginner' && (
+        <div className="grid grid-cols-2 gap-2">
+          {choices.map((option) => (
+            <button
+              key={option}
+              onClick={() => choose(option)}
+              disabled={revealed}
+              className={`py-3 px-2 rounded-lg border font-medium transition-colors ${choiceClass(option)}`}
+            >
+              {option}
+            </button>
+          ))}
+        </div>
+      )}
+
       {!revealed ? (
+        level === 'advanced' && (
         <form onSubmit={handleSubmit} className="flex gap-2">
           <input
             ref={inputRef}
@@ -107,19 +149,20 @@ export const Flashcard: React.FC<FlashcardProps> = ({ word, direction, onSubmit 
             type="submit"
             className="px-5 py-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium transition-colors"
           >
-            {typed ? 'Prüfen' : 'Zeigen'}
+            {answered ? 'Prüfen' : 'Zeigen'}
           </button>
         </form>
+        )
       ) : (
         <div className="grid grid-cols-2 gap-2">
           <button
-            onClick={() => onSubmit(outcome, true, userAnswer)}
+            onClick={() => onSubmit(outcome, true, given)}
             className="py-3 rounded-lg border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800 text-red-600 dark:text-red-400 font-medium transition-colors"
           >
             Nochmal
           </button>
           <button
-            onClick={() => onSubmit(outcome, false, userAnswer)}
+            onClick={() => onSubmit(outcome, false, given)}
             className="py-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium transition-colors"
           >
             Weiter
