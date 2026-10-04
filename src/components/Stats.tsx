@@ -19,10 +19,10 @@ export const StatsComponent: React.FC<StatsProps> = ({ stats, onReset, settings 
   ];
 
   const statuses = [
-    { label: 'Neu', value: stats.newCards, color: 'bg-gray-300 dark:bg-slate-600' },
-    { label: 'Lernend', value: stats.learningCards, color: 'bg-orange-400' },
-    { label: 'Wiederholen', value: stats.reviewingCards, color: 'bg-blue-500' },
-    { label: 'Gemeistert', value: stats.masteredCards, color: 'bg-green-500' },
+    { label: 'Neu', value: stats.newCards, color: 'bg-gray-200 dark:bg-slate-700' },
+    { label: 'Lernend', value: stats.learningCards, color: 'bg-emerald-200 dark:bg-emerald-900' },
+    { label: 'Wiederholen', value: stats.reviewingCards, color: 'bg-emerald-400' },
+    { label: 'Gemeistert', value: stats.masteredCards, color: 'bg-emerald-600' },
   ];
 
   const handleReset = () => {
@@ -37,7 +37,7 @@ export const StatsComponent: React.FC<StatsProps> = ({ stats, onReset, settings 
       <div className="grid grid-cols-2 gap-x-4 gap-y-6">
         {metrics.map(({ label, value }) => (
           <div key={label}>
-            <p className="text-3xl font-semibold tabular-nums">{value}</p>
+            <p className="text-3xl font-bold tracking-tight tabular-nums">{value}</p>
             <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{label}</p>
           </div>
         ))}

@@ -46,10 +46,10 @@ export const Flashcard: React.FC<FlashcardProps> = ({ word, direction, level, on
 
   const choiceClass = (option: string) => {
     if (!revealed) {
-      return 'border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800';
+      return 'border-gray-200 dark:border-slate-700 hover:border-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/40';
     }
     if (option === answer) {
-      return 'border-green-500 bg-green-50 dark:bg-green-950/40 text-green-700 dark:text-green-300';
+      return 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300';
     }
     if (option === chosen) {
       return 'border-red-500 bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300';
@@ -105,7 +105,7 @@ export const Flashcard: React.FC<FlashcardProps> = ({ word, direction, level, on
               {answered && (
                 <p
                   className={`mt-6 text-sm font-medium ${
-                    correct ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
+                    correct ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'
                   }`}
                 >
                   {correct ? '✓ Richtig' : `✗ Deine Antwort: ${given}`}
@@ -123,7 +123,7 @@ export const Flashcard: React.FC<FlashcardProps> = ({ word, direction, level, on
               key={option}
               onClick={() => choose(option)}
               disabled={revealed}
-              className={`py-3 px-2 rounded-lg border font-medium transition-colors ${choiceClass(option)}`}
+              className={`py-3 px-2 rounded-xl border font-medium transition-colors ${choiceClass(option)}`}
             >
               {option}
             </button>
@@ -143,11 +143,11 @@ export const Flashcard: React.FC<FlashcardProps> = ({ word, direction, level, on
             autoCapitalize="off"
             autoCorrect="off"
             spellCheck={false}
-            className="flex-1 min-w-0 px-4 py-3 rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:border-blue-500"
+            className="flex-1 min-w-0 px-4 py-3 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 dark:focus:ring-emerald-950 transition"
           />
           <button
             type="submit"
-            className="px-5 py-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium transition-colors"
+            className="px-5 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-medium shadow-lg shadow-emerald-600/25 transition"
           >
             {answered ? 'Prüfen' : 'Zeigen'}
           </button>
@@ -157,13 +157,13 @@ export const Flashcard: React.FC<FlashcardProps> = ({ word, direction, level, on
         <div className="grid grid-cols-2 gap-2">
           <button
             onClick={() => onSubmit(outcome, true, given)}
-            className="py-3 rounded-lg border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800 text-red-600 dark:text-red-400 font-medium transition-colors"
+            className="py-3 rounded-xl border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800 text-red-600 dark:text-red-400 font-medium transition-colors"
           >
             Nochmal
           </button>
           <button
             onClick={() => onSubmit(outcome, false, given)}
-            className="py-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium transition-colors"
+            className="py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-medium shadow-lg shadow-emerald-600/25 transition"
           >
             Weiter
           </button>

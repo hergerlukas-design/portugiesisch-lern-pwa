@@ -146,7 +146,7 @@ function App() {
     return (
       <div className="flex items-center justify-center min-h-screen bg-white dark:bg-slate-950">
         <div className="text-center">
-          <div className="animate-spin w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full mx-auto mb-4"></div>
+          <div className="animate-spin w-12 h-12 border-4 border-emerald-100 border-t-emerald-600 rounded-full mx-auto mb-4"></div>
           <p className="text-gray-600 dark:text-gray-400">Lädt...</p>
         </div>
       </div>
@@ -159,25 +159,25 @@ function App() {
         <Navigation currentMode={currentMode} onModeChange={setCurrentMode} />
       )}
 
-      <main className="max-w-xl mx-auto px-4 py-8">
+      <main className="max-w-xl mx-auto px-5 py-8">
         {currentMode === 'home' && (
           <div className="space-y-6">
             {dailyTask && (
               <button
                 onClick={handleStartDaily}
-                className={`w-full flex items-center justify-between px-5 py-4 rounded-xl border transition-colors ${
+                className={`w-full flex items-center justify-between px-6 py-5 rounded-2xl transition active:scale-[0.98] ${
                   dailyTask.completed
-                    ? 'border-green-200 dark:border-green-900 bg-green-50 dark:bg-green-950/40'
-                    : 'border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-900'
+                    ? 'bg-emerald-50 dark:bg-emerald-950/40 ring-1 ring-emerald-100 dark:ring-emerald-900'
+                    : 'bg-gradient-to-br from-emerald-500 to-emerald-700 text-white shadow-lg shadow-emerald-600/25'
                 }`}
               >
-                <span className="font-medium">Tagesaufgabe</span>
+                <span className="font-semibold">Tagesaufgabe</span>
                 <span
-                  className={
+                  className={`text-sm px-3 py-1 rounded-full font-medium ${
                     dailyTask.completed
-                      ? 'text-green-600 dark:text-green-400 font-medium'
-                      : 'text-gray-500 dark:text-gray-400'
-                  }
+                      ? 'text-emerald-700 dark:text-emerald-300'
+                      : 'bg-white/20 text-white'
+                  }`}
                 >
                   {dailyTask.completed ? '✓ geschafft' : `${dailyTask.wordIds.length} Wörter`}
                 </span>
@@ -185,8 +185,8 @@ function App() {
             )}
 
             <div className="text-center py-6">
-              <p className="text-5xl font-semibold tabular-nums">{dueCards.length}</p>
-              <p className="mt-1 text-gray-500 dark:text-gray-400">fällig</p>
+              <p className="text-6xl font-bold tracking-tight tabular-nums">{dueCards.length}</p>
+              <p className="mt-1 text-sm font-medium uppercase tracking-wider text-emerald-600 dark:text-emerald-400">fällig</p>
             </div>
 
             <CategorySelector
@@ -198,7 +198,7 @@ function App() {
 
             <button
               onClick={handleStartStudy}
-              className="w-full py-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-lg font-medium transition-colors"
+              className="w-full py-4 rounded-2xl text-lg bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-medium shadow-lg shadow-emerald-600/25 transition"
             >
               Start
             </button>

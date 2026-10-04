@@ -7,16 +7,16 @@ interface SegmentedProps<T extends string> {
 export function Segmented<T extends string>({ options, value, onChange }: SegmentedProps<T>) {
   return (
     <div
-      className="grid gap-1 p-1 rounded-lg bg-gray-100 dark:bg-slate-800"
+      className="grid gap-1 p-1 rounded-xl bg-gray-100/80 dark:bg-slate-900"
       style={{ gridTemplateColumns: `repeat(${options.length}, minmax(0, 1fr))` }}
     >
       {options.map((option) => (
         <button
           key={option.id}
           onClick={() => onChange(option.id)}
-          className={`py-2 rounded-md text-sm transition-colors ${
+          className={`py-2 rounded-lg text-sm transition-colors ${
             value === option.id
-              ? 'bg-white dark:bg-slate-700 text-gray-900 dark:text-white font-medium shadow-sm'
+              ? 'bg-white dark:bg-slate-800 text-emerald-700 dark:text-emerald-300 font-semibold shadow-sm'
               : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
           }`}
         >

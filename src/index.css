@@ -38,14 +38,14 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  @apply rounded-2xl border;
+  @apply rounded-3xl border shadow-xl shadow-gray-200/60 dark:shadow-none;
 }
 
 .flashcard-front {
-  @apply bg-white dark:bg-slate-900 border-gray-200 dark:border-slate-800;
+  @apply bg-white dark:bg-slate-900 border-gray-100 dark:border-slate-800;
 }
 
 .flashcard-back {
-  @apply bg-white dark:bg-slate-900 border-gray-200 dark:border-slate-800;
+  @apply bg-emerald-50 dark:bg-emerald-950/40 border-emerald-100 dark:border-emerald-900;
   transform: rotateY(180deg);
 }

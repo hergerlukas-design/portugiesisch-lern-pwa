@@ -14,16 +14,16 @@ const TABS: { mode: Mode; label: string }[] = [
 
 export const Navigation: React.FC<NavigationProps> = ({ currentMode, onModeChange }) => {
   return (
-    <header className="border-b border-gray-200 dark:border-slate-800">
+    <header className="sticky top-0 z-10 bg-white/80 dark:bg-slate-950/80 backdrop-blur border-b border-gray-100 dark:border-slate-900">
       <div className="max-w-xl mx-auto px-4 h-14 flex items-center justify-center">
         <nav className="flex gap-1">
           {TABS.map(({ mode, label }) => (
             <button
               key={mode}
               onClick={() => onModeChange(mode)}
-              className={`px-3 py-1.5 rounded-md text-sm transition-colors ${
+              className={`px-4 py-1.5 rounded-full text-sm transition-colors ${
                 currentMode === mode
-                  ? 'bg-gray-100 dark:bg-slate-800 text-gray-900 dark:text-white font-medium'
+                  ? 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 font-semibold'
                   : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
               }`}
             >

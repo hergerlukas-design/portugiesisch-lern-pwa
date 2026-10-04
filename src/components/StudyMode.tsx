@@ -59,13 +59,13 @@ export const StudyMode: React.FC<StudyModeProps> = ({
               setAttempt((a) => a + 1);
               setFinished(false);
             }}
-            className="flex-1 py-3 rounded-lg border border-gray-200 dark:border-slate-700 font-medium hover:bg-gray-50 dark:hover:bg-slate-800"
+            className="flex-1 py-3 rounded-xl border border-gray-200 dark:border-slate-700 font-medium hover:bg-gray-50 dark:hover:bg-slate-800"
           >
             Nochmal
           </button>
           <button
             onClick={onFinish}
-            className="flex-1 py-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium"
+            className="flex-1 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-medium shadow-lg shadow-emerald-600/25 transition"
           >
             Fertig
           </button>
@@ -116,9 +116,9 @@ export const StudyMode: React.FC<StudyModeProps> = ({
         >
           ×
         </button>
-        <div className="flex-1 h-1.5 bg-gray-100 dark:bg-slate-800 rounded-full overflow-hidden">
+        <div className="flex-1 h-2 bg-gray-100 dark:bg-slate-800 rounded-full overflow-hidden">
           <div
-            className="h-full bg-blue-500 transition-all duration-300"
+            className="h-full bg-emerald-500 rounded-full transition-all duration-300"
             style={{ width: `${(doneCount / cards.length) * 100}%` }}
           />
         </div>
