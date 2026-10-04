@@ -5,7 +5,7 @@ import App from './App.tsx'
 
 // Register Service Worker for offline functionality
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js').then((registration) => {
+  navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`).then((registration) => {
     console.log('Service Worker registered:', registration);
   }).catch((error) => {
     console.log('Service Worker registration failed:', error);

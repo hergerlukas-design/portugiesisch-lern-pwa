@@ -8,9 +8,9 @@ const CACHE_NAME = `portugiesisch-lernen-${CACHE_VERSION}`;
 
 // Assets to cache on install
 const ASSETS_TO_CACHE = [
-  '/',
-  '/index.html',
-  '/manifest.json',
+  './',
+  './index.html',
+  './manifest.json',
 ];
 
 /**

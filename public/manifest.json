@@ -2,8 +2,8 @@
   "name": "Portugiesisch Lernen PWA",
   "short_name": "Português Lernen",
   "description": "Lerne Portugiesisch mit Spaced Repetition und Flashcards - Offline-First PWA",
-  "start_url": "/",
-  "scope": "/",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "orientation": "portrait-primary",
   "background_color": "#ffffff",
@@ -36,7 +36,7 @@
       "name": "Lernen starten",
       "short_name": "Lernen",
       "description": "Starte eine neue Lern-Session",
-      "url": "/?mode=study",
+      "url": "./?mode=study",
       "icons": [
         {
           "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'><rect fill='%233b82f6' width='96' height='96'/><text x='50%' y='50%' font-size='50' fill='white' text-anchor='middle' dy='.3em'>📚</text></svg>",
@@ -49,7 +49,7 @@
       "name": "Statistiken",
       "short_name": "Stats",
       "description": "Siehe deine Statistiken und Fortschritt",
-      "url": "/?mode=stats",
+      "url": "./?mode=stats",
       "icons": [
         {
           "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'><rect fill='%238b5cf6' width='96' height='96'/><text x='50%' y='50%' font-size='50' fill='white' text-anchor='middle' dy='.3em'>📊</text></svg>",

@@ -1,8 +1,7 @@
 name: Fly Deploy
 
+# Manual only while the Fly.io org is over its machine limit; GitHub Pages deploys on push.
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 concurrency: deploy-group
