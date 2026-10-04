@@ -24,19 +24,19 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Install a simple HTTP server to serve the static files
-RUN npm install -g serve
+# Install wget for health check + simple HTTP server
+RUN apk add --no-cache wget && npm install -g serve
 
 # Copy built app from builder
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/public ./public
 
 # Expose port
-EXPOSE 3000
+EXPOSE 8080
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD wget --quiet --tries=1 --spider http://localhost:3000 || exit 1
+  CMD wget --quiet --tries=1 --spider http://localhost:8080 || exit 1
 
-# Start server
-CMD ["serve", "-s", "dist", "-l", "3000"]
+# Start server (use PORT env var if set, otherwise default to 8080)
+CMD ["sh", "-c", "serve -s dist -l ${PORT:-8080}"]
