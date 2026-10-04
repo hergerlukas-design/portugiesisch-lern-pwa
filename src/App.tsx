@@ -1,10 +1,15 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Navigation } from './components/Navigation';
 import { CategorySelector } from './components/CategorySelector';
 import { DirectionToggle } from './components/DirectionToggle';
 import { StudyMode } from './components/StudyMode';
 import { StatsComponent } from './components/Stats';
 import { useProgress } from './lib/useProgress';
+import {
+  getOrCreateDailyTask,
+  markDailyTaskCompleted,
+  type DailyTask,
+} from './lib/dailyTask';
 import { getWordIds, getWordsByCategory } from './data/words';
 import type { Card, Direction } from './types';
 
@@ -21,7 +26,11 @@ function loadDirection(): Direction {
 function App() {
   const [currentMode, setCurrentMode] = useState<'home' | 'study' | 'stats'>('home');
   const [selectedCategory, setSelectedCategory] = useState<'all' | 'top100' | 'top500' | 'top1000'>('top100');
-  const [cardsForStudy, setCardsForStudy] = useState<Card[]>([]);
+  // Cards of the running session, fixed at start so ratings don't reshuffle it
+  const [session, setSession] = useState<{ cards: Card[]; daily: boolean } | null>(null);
+  const [dailyTask, setDailyTask] = useState<DailyTask | null>(null);
+  // Words already recorded in this daily session (only the first answer counts for SM-2)
+  const recordedInSession = useRef(new Set<string>());
   const [direction, setDirection] = useState<Direction>(loadDirection);
 
   const handleDirectionChange = (newDirection: Direction) => {
@@ -52,28 +61,39 @@ function App() {
     }
   }, [isLoaded, cards.length, initializeCards]);
 
-  // Get cards due for review
+  const dueCards = useMemo(() => getCardsForReview(), [getCardsForReview]);
+
+  // Pick (or restore) today's task once the cards exist
   useEffect(() => {
-    const cardsForReview = getCardsForReview();
-    setCardsForStudy(cardsForReview);
-  }, [cards, getCardsForReview]);
+    if (cards.length > 0 && !dailyTask) {
+      setDailyTask(getOrCreateDailyTask(cards));
+    }
+  }, [cards, dailyTask]);
+
+  const startSession = (sessionCards: Card[], daily: boolean) => {
+    recordedInSession.current = new Set();
+    setSession({ cards: sessionCards, daily });
+    setCurrentMode('study');
+  };
 
   const handleStartStudy = () => {
-    const wordsInCategory = getWordsByCategory(selectedCategory);
-    const categoryWordIds = wordsInCategory.map((w) => w.id);
-
-    // Get cards in this category that are due for review
-    const cardsToStudy = cards.filter((card) =>
-      categoryWordIds.includes(card.wordId)
-    );
+    const categoryWordIds = new Set(getWordsByCategory(selectedCategory).map((w) => w.id));
+    const cardsToStudy = dueCards.filter((card) => categoryWordIds.has(card.wordId));
 
     if (cardsToStudy.length === 0) {
-      alert('Keine Karten zum Lernen in dieser Kategorie verfügbar');
+      alert('Keine fälligen Karten in dieser Kategorie');
       return;
     }
 
-    setCardsForStudy(cardsToStudy);
-    setCurrentMode('study');
+    startSession(cardsToStudy, false);
+  };
+
+  const handleStartDaily = () => {
+    if (!dailyTask) return;
+    const taskCards = dailyTask.wordIds
+      .map((id) => cards.find((card) => card.wordId === id))
+      .filter((card): card is Card => !!card);
+    startSession(taskCards, true);
   };
 
   const handleCardComplete = (
@@ -82,7 +102,19 @@ function App() {
     userAnswer: string,
     correct: boolean
   ) => {
+    // Daily task: only the first answer per word on the first run feeds spaced repetition;
+    // retries and repeat runs are practice
+    if (session?.daily) {
+      if (dailyTask?.completed || recordedInSession.current.has(wordId)) return;
+      recordedInSession.current.add(wordId);
+    }
     recordProgress(wordId, quality, userAnswer, correct);
+  };
+
+  const handleDailyComplete = () => {
+    if (session?.daily && dailyTask && !dailyTask.completed) {
+      setDailyTask(markDailyTaskCompleted(dailyTask));
+    }
   };
 
   const stats = getStats();
@@ -107,8 +139,30 @@ function App() {
       <main className="max-w-xl mx-auto px-4 py-8">
         {currentMode === 'home' && (
           <div className="space-y-6">
+            {dailyTask && (
+              <button
+                onClick={handleStartDaily}
+                className={`w-full flex items-center justify-between px-5 py-4 rounded-xl border transition-colors ${
+                  dailyTask.completed
+                    ? 'border-green-200 dark:border-green-900 bg-green-50 dark:bg-green-950/40'
+                    : 'border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-900'
+                }`}
+              >
+                <span className="font-medium">Tagesaufgabe</span>
+                <span
+                  className={
+                    dailyTask.completed
+                      ? 'text-green-600 dark:text-green-400 font-medium'
+                      : 'text-gray-500 dark:text-gray-400'
+                  }
+                >
+                  {dailyTask.completed ? '✓ geschafft' : `${dailyTask.wordIds.length} Wörter`}
+                </span>
+              </button>
+            )}
+
             <div className="text-center py-6">
-              <p className="text-5xl font-semibold tabular-nums">{cardsForStudy.length}</p>
+              <p className="text-5xl font-semibold tabular-nums">{dueCards.length}</p>
               <p className="mt-1 text-gray-500 dark:text-gray-400">fällig</p>
             </div>
 
@@ -128,11 +182,13 @@ function App() {
           </div>
         )}
 
-        {currentMode === 'study' && (
+        {currentMode === 'study' && session && (
           <StudyMode
-            cards={cardsForStudy}
+            cards={session.cards}
             direction={direction}
+            repeatUntilCorrect={session.daily}
             onCardComplete={handleCardComplete}
+            onComplete={handleDailyComplete}
             onFinish={() => setCurrentMode('home')}
           />
         )}

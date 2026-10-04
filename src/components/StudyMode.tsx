@@ -6,17 +6,27 @@ import { getWordById } from '../data/words';
 interface StudyModeProps {
   cards: Card[];
   direction: Direction;
+  // Missed cards go back to the end of the queue until every card was answered correctly
+  repeatUntilCorrect?: boolean;
   onCardComplete: (wordId: string, quality: number, userAnswer: string, correct: boolean) => void;
+  // All cards done (for repeatUntilCorrect: all correct)
+  onComplete?: () => void;
   onFinish: () => void;
 }
 
 export const StudyMode: React.FC<StudyModeProps> = ({
   cards,
   direction,
+  repeatUntilCorrect = false,
   onCardComplete,
+  onComplete,
   onFinish,
 }) => {
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [queue, setQueue] = useState<Card[]>(cards);
+  const [doneCount, setDoneCount] = useState(0);
+  // Counts every card shown, so a card that comes straight back still gets a fresh Flashcard
+  const [attempt, setAttempt] = useState(0);
+  const [finished, setFinished] = useState(false);
 
   if (cards.length === 0) {
     return (
@@ -32,7 +42,37 @@ export const StudyMode: React.FC<StudyModeProps> = ({
     );
   }
 
-  const currentCard = cards[currentIndex];
+  if (finished) {
+    return (
+      <div className="text-center py-16 space-y-8">
+        <div>
+          <p className="text-5xl">🎉</p>
+          <p className="mt-4 text-xl font-semibold">Alle {cards.length} richtig!</p>
+        </div>
+        <div className="flex gap-3">
+          <button
+            onClick={() => {
+              setQueue(cards);
+              setDoneCount(0);
+              setAttempt((a) => a + 1);
+              setFinished(false);
+            }}
+            className="flex-1 py-3 rounded-lg border border-gray-200 dark:border-slate-700 font-medium hover:bg-gray-50 dark:hover:bg-slate-800"
+          >
+            Nochmal
+          </button>
+          <button
+            onClick={onFinish}
+            className="flex-1 py-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium"
+          >
+            Fertig
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const [currentCard, ...rest] = queue;
   const word = getWordById(currentCard.wordId);
 
   if (!word) {
@@ -44,8 +84,20 @@ export const StudyMode: React.FC<StudyModeProps> = ({
   const handleCardComplete = (quality: number, userAnswer: string, correct: boolean) => {
     onCardComplete(currentCard.wordId, quality, userAnswer, correct);
 
-    if (currentIndex < cards.length - 1) {
-      setCurrentIndex(currentIndex + 1);
+    const retry = repeatUntilCorrect && !correct;
+    const nextQueue = retry ? [...rest, currentCard] : rest;
+    setAttempt((a) => a + 1);
+
+    if (nextQueue.length > 0) {
+      setQueue(nextQueue);
+      if (!retry) setDoneCount((n) => n + 1);
+      return;
+    }
+
+    onComplete?.();
+    if (repeatUntilCorrect) {
+      setDoneCount(cards.length);
+      setFinished(true);
     } else {
       onFinish();
     }
@@ -65,16 +117,16 @@ export const StudyMode: React.FC<StudyModeProps> = ({
         <div className="flex-1 h-1.5 bg-gray-100 dark:bg-slate-800 rounded-full overflow-hidden">
           <div
             className="h-full bg-blue-500 transition-all duration-300"
-            style={{ width: `${(currentIndex / cards.length) * 100}%` }}
+            style={{ width: `${(doneCount / cards.length) * 100}%` }}
           />
         </div>
         <span className="text-sm tabular-nums text-gray-500 dark:text-gray-400">
-          {currentIndex + 1}/{cards.length}
+          {doneCount}/{cards.length}
         </span>
       </div>
 
       <Flashcard
-        key={currentCard.wordId}
+        key={attempt}
         word={word}
         direction={direction}
         onSubmit={handleCardComplete}
