@@ -8,13 +8,9 @@ interface FlashcardProps {
   onSubmit: (quality: number, userAnswer: string, correct: boolean) => void;
 }
 
-// SM-2 quality per rating; below 3 counts as a failed recall
-const RATINGS = [
-  { quality: 1, label: 'Nochmal', className: 'text-red-600 dark:text-red-400' },
-  { quality: 3, label: 'Schwer', className: 'text-orange-600 dark:text-orange-400' },
-  { quality: 4, label: 'Gut', className: 'text-blue-600 dark:text-blue-400' },
-  { quality: 5, label: 'Leicht', className: 'text-green-600 dark:text-green-400' },
-];
+// SM-2 quality: "Nochmal" is a failed recall, "Weiter" a good one
+const QUALITY_AGAIN = 1;
+const QUALITY_GOOD = 4;
 
 export const Flashcard: React.FC<FlashcardProps> = ({ word, direction, onSubmit }) => {
   const [flipped, setFlipped] = useState(false);
@@ -117,16 +113,22 @@ export const Flashcard: React.FC<FlashcardProps> = ({ word, direction, onSubmit 
           </button>
         </form>
       ) : (
-        <div className="grid grid-cols-4 gap-2">
-          {RATINGS.map(({ quality, label, className }) => (
-            <button
-              key={quality}
-              onClick={() => onSubmit(quality, userAnswer, typed ? correct : quality >= 3)}
-              className={`py-3 rounded-lg border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800 text-sm font-medium transition-colors ${className}`}
-            >
-              {label}
-            </button>
-          ))}
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            onClick={() => onSubmit(QUALITY_AGAIN, userAnswer, false)}
+            className="py-3 rounded-lg border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800 text-red-600 dark:text-red-400 font-medium transition-colors"
+          >
+            Nochmal
+          </button>
+          <button
+            // A wrong typed answer still counts as missed, so "Weiter" doesn't hide it
+            onClick={() =>
+              onSubmit(typed && !correct ? QUALITY_AGAIN : QUALITY_GOOD, userAnswer, !typed || correct)
+            }
+            className="py-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium transition-colors"
+          >
+            Weiter
+          </button>
         </div>
       )}
     </div>
