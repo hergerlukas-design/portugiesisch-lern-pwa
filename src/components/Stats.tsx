@@ -3,12 +3,9 @@ import type { Stats } from '../types';
 
 interface StatsProps {
   stats: Stats;
-  onReset?: () => void;
-  // Settings shown below the numbers, above the reset link
-  settings?: React.ReactNode;
 }
 
-export const StatsComponent: React.FC<StatsProps> = ({ stats, onReset, settings }) => {
+export const StatsComponent: React.FC<StatsProps> = ({ stats }) => {
   const total = Math.max(stats.totalCards, 1);
 
   const metrics = [
@@ -24,12 +21,6 @@ export const StatsComponent: React.FC<StatsProps> = ({ stats, onReset, settings 
     { label: 'Wiederholen', value: stats.reviewingCards, color: 'bg-forest-400' },
     { label: 'Gemeistert', value: stats.masteredCards, color: 'bg-forest-600' },
   ];
-
-  const handleReset = () => {
-    if (onReset && confirm('Gesamten Lernfortschritt löschen? Das kann nicht rückgängig gemacht werden.')) {
-      onReset();
-    }
-  };
 
   return (
     <div className="space-y-10">
@@ -63,17 +54,6 @@ export const StatsComponent: React.FC<StatsProps> = ({ stats, onReset, settings 
           ))}
         </ul>
       </div>
-
-      {settings}
-
-      {onReset && (
-        <button
-          onClick={handleReset}
-          className="text-sm text-stone-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
-        >
-          Fortschritt zurücksetzen
-        </button>
-      )}
     </div>
   );
 };

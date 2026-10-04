@@ -2,9 +2,9 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Navigation } from './components/Navigation';
 import { CategorySelector } from './components/CategorySelector';
 import { DirectionToggle } from './components/DirectionToggle';
-import { Segmented } from './components/Segmented';
 import { StudyMode } from './components/StudyMode';
 import { StatsComponent } from './components/Stats';
+import { Settings } from './components/Settings';
 import { useProgress } from './lib/useProgress';
 import {
   getOrCreateDailyTask,
@@ -16,11 +16,6 @@ import type { Card, Direction, Level, Outcome } from './types';
 
 const DIRECTION_KEY = 'studyDirection';
 const LEVEL_KEY = 'studyLevel';
-
-const LEVELS: { id: Level; label: string }[] = [
-  { id: 'beginner', label: 'Anfänger' },
-  { id: 'advanced', label: 'Fortgeschritten' },
-];
 
 // Saved choice if it is one of `allowed`, else the first allowed value
 function loadSetting<T extends string>(key: string, allowed: T[]): T {
@@ -41,7 +36,7 @@ function saveSetting(key: string, value: string) {
 }
 
 function App() {
-  const [currentMode, setCurrentMode] = useState<'home' | 'study' | 'stats'>('home');
+  const [currentMode, setCurrentMode] = useState<'home' | 'study' | 'stats' | 'settings'>('home');
   const [selectedCategory, setSelectedCategory] = useState<'all' | 'top100' | 'top500' | 'top1000'>('top100');
   // Cards of the running session, fixed at start so ratings don't reshuffle it
   const [session, setSession] = useState<{ cards: Card[]; daily: boolean } | null>(null);
@@ -218,16 +213,11 @@ function App() {
         )}
 
         {currentMode === 'stats' && (
-          <StatsComponent
-            stats={stats}
-            onReset={resetAllProgress}
-            settings={
-              <div>
-                <p className="text-sm text-stone-500 dark:text-gray-400 mb-3">Niveau</p>
-                <Segmented options={LEVELS} value={level} onChange={handleLevelChange} />
-              </div>
-            }
-          />
+          <StatsComponent stats={stats} />
+        )}
+
+        {currentMode === 'settings' && (
+          <Settings level={level} onLevelChange={handleLevelChange} onReset={resetAllProgress} />
         )}
       </main>
     </div>
