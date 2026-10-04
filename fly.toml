@@ -20,25 +20,9 @@ primary_region = "fra"
   min_machines_running = 1
   processes = ["app"]
 
-[[services]]
-  protocol = "tcp"
-  internal_port = 8080
-
-  [services.concurrency]
-    type = "connections"
-    hard_limit = 1000
-    soft_limit = 900
-
-  [[services.ports]]
-    number = 80
-    handlers = ["http"]
-    force_https = true
-
-  [[services.ports]]
-    number = 443
-    handlers = ["tls", "http"]
-
-  [services.tcp_checks]
-    interval = 10000
-    grace_period = "5s"
-    timeout = 2000
+  [[http_service.checks]]
+    grace_period = "10s"
+    interval = "15s"
+    method = "GET"
+    path = "/"
+    timeout = "2s"
