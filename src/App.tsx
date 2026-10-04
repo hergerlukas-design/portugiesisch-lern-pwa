@@ -144,17 +144,17 @@ function App() {
 
   if (!isLoaded) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-white dark:bg-slate-950">
+      <div className="flex items-center justify-center min-h-screen bg-shell-100 dark:bg-slate-950">
         <div className="text-center">
           <div className="animate-spin w-12 h-12 border-4 border-forest-100 border-t-forest-600 rounded-full mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">Lädt...</p>
+          <p className="text-stone-600 dark:text-gray-400">Lädt...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-slate-950 text-gray-900 dark:text-gray-100">
+    <div className="min-h-screen bg-shell-100 dark:bg-slate-950 text-stone-900 dark:text-gray-100">
       {currentMode !== 'study' && (
         <Navigation currentMode={currentMode} onModeChange={setCurrentMode} />
       )}
@@ -223,7 +223,7 @@ function App() {
             onReset={resetAllProgress}
             settings={
               <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">Niveau</p>
+                <p className="text-sm text-stone-500 dark:text-gray-400 mb-3">Niveau</p>
                 <Segmented options={LEVELS} value={level} onChange={handleLevelChange} />
               </div>
             }

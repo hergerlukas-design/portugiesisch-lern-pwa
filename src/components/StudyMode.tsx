@@ -33,10 +33,10 @@ export const StudyMode: React.FC<StudyModeProps> = ({
   if (cards.length === 0) {
     return (
       <div className="text-center py-16">
-        <p className="text-gray-500 dark:text-gray-400 mb-6">Keine Karten zum Lernen verfügbar</p>
+        <p className="text-stone-500 dark:text-gray-400 mb-6">Keine Karten zum Lernen verfügbar</p>
         <button
           onClick={onFinish}
-          className="px-5 py-2.5 rounded-lg bg-gray-100 dark:bg-slate-800 font-medium"
+          className="px-5 py-2.5 rounded-lg bg-shell-200 dark:bg-slate-800 font-medium"
         >
           Zurück
         </button>
@@ -59,7 +59,7 @@ export const StudyMode: React.FC<StudyModeProps> = ({
               setAttempt((a) => a + 1);
               setFinished(false);
             }}
-            className="flex-1 py-3 rounded-xl border border-gray-200 dark:border-slate-700 font-medium hover:bg-gray-50 dark:hover:bg-slate-800"
+            className="flex-1 py-3 rounded-xl border border-shell-300 dark:border-slate-700 font-medium hover:bg-shell-100 dark:hover:bg-slate-800"
           >
             Nochmal
           </button>
@@ -112,17 +112,17 @@ export const StudyMode: React.FC<StudyModeProps> = ({
         <button
           onClick={onFinish}
           aria-label="Beenden"
-          className="w-8 h-8 -ml-1 flex items-center justify-center rounded-md text-xl text-gray-400 hover:text-gray-900 dark:hover:text-white"
+          className="w-8 h-8 -ml-1 flex items-center justify-center rounded-md text-xl text-stone-400 hover:text-stone-900 dark:hover:text-white"
         >
           ×
         </button>
-        <div className="flex-1 h-2 bg-gray-100 dark:bg-slate-800 rounded-full overflow-hidden">
+        <div className="flex-1 h-2 bg-shell-200 dark:bg-slate-800 rounded-full overflow-hidden">
           <div
             className="h-full bg-forest-500 rounded-full transition-all duration-300"
             style={{ width: `${(doneCount / cards.length) * 100}%` }}
           />
         </div>
-        <span className="text-sm tabular-nums text-gray-500 dark:text-gray-400">
+        <span className="text-sm tabular-nums text-stone-500 dark:text-gray-400">
           {doneCount}/{cards.length}
         </span>
       </div>

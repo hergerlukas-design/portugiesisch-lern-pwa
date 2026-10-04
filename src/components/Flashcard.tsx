@@ -46,7 +46,7 @@ export const Flashcard: React.FC<FlashcardProps> = ({ word, direction, level, on
 
   const choiceClass = (option: string) => {
     if (!revealed) {
-      return 'border-gray-200 dark:border-slate-700 hover:border-forest-300 hover:bg-forest-50 dark:hover:bg-forest-950/40';
+      return 'border-shell-300 dark:border-slate-700 hover:border-forest-300 hover:bg-forest-50 dark:hover:bg-forest-950/40';
     }
     if (option === answer) {
       return 'border-forest-500 bg-forest-50 dark:bg-forest-950/40 text-forest-700 dark:text-forest-300';
@@ -54,7 +54,7 @@ export const Flashcard: React.FC<FlashcardProps> = ({ word, direction, level, on
     if (option === chosen) {
       return 'border-red-500 bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300';
     }
-    return 'border-gray-200 dark:border-slate-700 opacity-40';
+    return 'border-shell-300 dark:border-slate-700 opacity-40';
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -69,7 +69,7 @@ export const Flashcard: React.FC<FlashcardProps> = ({ word, direction, level, on
   };
 
   const flipHint = (
-    <span aria-hidden className="absolute top-3 right-4 text-lg text-gray-300 dark:text-slate-600">
+    <span aria-hidden className="absolute top-3 right-4 text-lg text-stone-300 dark:text-slate-600">
       ↻
     </span>
   );
@@ -87,9 +87,9 @@ export const Flashcard: React.FC<FlashcardProps> = ({ word, direction, level, on
           <div className="flashcard-front">
             {flipHint}
             <div className="text-center px-6">
-              <p className="text-3xl font-semibold text-gray-900 dark:text-white">{prompt}</p>
+              <p className="text-3xl font-semibold text-stone-900 dark:text-white">{prompt}</p>
               {promptExample && (
-                <p className="mt-4 text-sm text-gray-500 dark:text-gray-400 italic">{promptExample}</p>
+                <p className="mt-4 text-sm text-stone-500 dark:text-gray-400 italic">{promptExample}</p>
               )}
             </div>
           </div>
@@ -98,9 +98,9 @@ export const Flashcard: React.FC<FlashcardProps> = ({ word, direction, level, on
           <div className="flashcard-back">
             {flipHint}
             <div className="text-center px-6">
-              <p className="text-3xl font-semibold text-gray-900 dark:text-white">{answer}</p>
+              <p className="text-3xl font-semibold text-stone-900 dark:text-white">{answer}</p>
               {answerExample && (
-                <p className="mt-4 text-sm text-gray-500 dark:text-gray-400 italic">{answerExample}</p>
+                <p className="mt-4 text-sm text-stone-500 dark:text-gray-400 italic">{answerExample}</p>
               )}
               {answered && (
                 <p
@@ -143,7 +143,7 @@ export const Flashcard: React.FC<FlashcardProps> = ({ word, direction, level, on
             autoCapitalize="off"
             autoCorrect="off"
             spellCheck={false}
-            className="flex-1 min-w-0 px-4 py-3 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:border-forest-500 focus:ring-4 focus:ring-forest-100 dark:focus:ring-forest-950 transition"
+            className="flex-1 min-w-0 px-4 py-3 rounded-xl border border-shell-300 dark:border-slate-700 bg-shell-50 dark:bg-slate-900 text-stone-900 dark:text-white focus:outline-none focus:border-forest-500 focus:ring-4 focus:ring-forest-100 dark:focus:ring-forest-950 transition"
           />
           <button
             type="submit"
@@ -157,7 +157,7 @@ export const Flashcard: React.FC<FlashcardProps> = ({ word, direction, level, on
         <div className="grid grid-cols-2 gap-2">
           <button
             onClick={() => onSubmit(outcome, true, given)}
-            className="py-3 rounded-xl border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800 text-red-600 dark:text-red-400 font-medium transition-colors"
+            className="py-3 rounded-xl border border-shell-300 dark:border-slate-700 hover:bg-shell-100 dark:hover:bg-slate-800 text-red-600 dark:text-red-400 font-medium transition-colors"
           >
             Nochmal
           </button>

@@ -14,7 +14,7 @@ const TABS: { mode: Mode; label: string }[] = [
 
 export const Navigation: React.FC<NavigationProps> = ({ currentMode, onModeChange }) => {
   return (
-    <header className="sticky top-0 z-10 bg-white/80 dark:bg-slate-950/80 backdrop-blur border-b border-gray-100 dark:border-slate-900">
+    <header className="sticky top-0 z-10 bg-shell-100/80 dark:bg-slate-950/80 backdrop-blur border-b border-shell-200 dark:border-slate-900">
       <div className="max-w-xl mx-auto px-4 h-14 flex items-center justify-center">
         <nav className="flex gap-1">
           {TABS.map(({ mode, label }) => (
@@ -24,7 +24,7 @@ export const Navigation: React.FC<NavigationProps> = ({ currentMode, onModeChang
               className={`px-4 py-1.5 rounded-full text-sm transition-colors ${
                 currentMode === mode
                   ? 'bg-forest-50 dark:bg-forest-950/50 text-forest-700 dark:text-forest-300 font-semibold'
-                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                  : 'text-stone-500 dark:text-gray-400 hover:text-stone-900 dark:hover:text-white'
               }`}
             >
               {label}

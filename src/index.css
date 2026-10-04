@@ -13,6 +13,12 @@
   --color-forest-800: #1e3f29;
   --color-forest-900: #183322;
   --color-forest-950: #0d1d13;
+
+  /* Eggshell neutrals: page, surfaces, tracks, borders */
+  --color-shell-50: #fcfaf5;
+  --color-shell-100: #f6f2e8;
+  --color-shell-200: #ece6d8;
+  --color-shell-300: #ded6c4;
 }
 
 html {
@@ -20,7 +26,7 @@ html {
 }
 
 body {
-  @apply bg-white dark:bg-slate-950 text-gray-900 dark:text-gray-100;
+  @apply bg-shell-100 dark:bg-slate-950 text-stone-900 dark:text-gray-100;
 }
 
 #root {
@@ -53,11 +59,11 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  @apply rounded-3xl border shadow-xl shadow-gray-200/60 dark:shadow-none;
+  @apply rounded-3xl border shadow-xl shadow-shell-300/60 dark:shadow-none;
 }
 
 .flashcard-front {
-  @apply bg-white dark:bg-slate-900 border-gray-100 dark:border-slate-800;
+  @apply bg-shell-50 dark:bg-slate-900 border-shell-200 dark:border-slate-800;
 }
 
 .flashcard-back {
