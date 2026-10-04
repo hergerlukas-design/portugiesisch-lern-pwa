@@ -3,7 +3,7 @@
  * Enables offline functionality with cache-first strategy
  */
 
-const CACHE_VERSION = 'v1';
+const CACHE_VERSION = 'v2';
 const CACHE_NAME = `portugiesisch-lernen-${CACHE_VERSION}`;
 
 // Assets to cache on install
@@ -18,6 +18,9 @@ const ASSETS_TO_CACHE = [
  */
 self.addEventListener('install', (event) => {
   console.log('[Service Worker] Installing...');
+
+  // Take over from an older worker right away instead of waiting for all tabs to close
+  self.skipWaiting();
 
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
@@ -47,7 +50,7 @@ self.addEventListener('activate', (event) => {
           }
         })
       );
-    })
+    }).then(() => self.clients.claim())
   );
 });
 
@@ -62,8 +65,9 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Network first for API requests (if any)
-  if (request.url.includes('/api/')) {
+  // Network first for page loads (so new deploys show up) and API requests;
+  // the cache is only the offline fallback
+  if (request.mode === 'navigate' || request.url.includes('/api/')) {
     event.respondWith(
       fetch(request)
         .then((response) => {
@@ -77,8 +81,10 @@ self.addEventListener('fetch', (event) => {
           return response;
         })
         .catch(() => {
-          // Return cached response on network error
-          return caches.match(request);
+          // Offline: cached copy, or the cached start page for any page load
+          return caches.match(request).then(
+            (cached) => cached || (request.mode === 'navigate' ? caches.match('./') : undefined)
+          );
         })
     );
     return;
