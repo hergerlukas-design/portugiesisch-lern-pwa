@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Navigation } from './components/Navigation';
+import { Navigation, ScreenHeader } from './components/Navigation';
+import { Backdrop } from './components/Backdrop';
 import { CategorySelector } from './components/CategorySelector';
 import { DirectionToggle } from './components/DirectionToggle';
 import { StudyMode } from './components/StudyMode';
@@ -19,6 +20,16 @@ import { getWordIds, getWordsByCategory } from './data/words';
 import type { Card, Direction, Level, Outcome, Theme } from './types';
 
 const DIRECTION_KEY = 'studyDirection';
+
+type Category = 'all' | 'top100' | 'top500' | 'top1000';
+
+const todayLabel = () =>
+  new Date().toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long' });
+
+const greeting = () => {
+  const hour = new Date().getHours();
+  return hour < 12 ? 'Bom dia!' : hour < 18 ? 'Boa tarde!' : 'Boa noite!';
+};
 
 const LEVEL_LABELS: { id: Level; label: string }[] = [
   { id: 'beginner', label: 'Anfänger' },
@@ -46,7 +57,7 @@ function saveSetting(key: string, value: string) {
 
 function App() {
   const [currentMode, setCurrentMode] = useState<'home' | 'study' | 'stats' | 'settings'>('home');
-  const [selectedCategory, setSelectedCategory] = useState<'all' | 'top100' | 'top500' | 'top1000'>('top100');
+  const [selectedCategory, setSelectedCategory] = useState<Category>('top100');
   // Cards of the running session, fixed at start so ratings don't reshuffle it
   const [session, setSession] = useState<{ cards: Card[]; daily: boolean; level: Level } | null>(null);
   const [dailyTask, setDailyTask] = useState<DailyTask | null>(null);
@@ -163,86 +174,134 @@ function App() {
 
   const stats = getStats();
 
+  // Words per category and how many of them have been studied (in this direction)
+  const categoryCounts = useMemo(() => {
+    const studied = new Set(cards.filter((c) => c.status !== 'new').map((c) => c.wordId));
+    const count = (category: Category) => {
+      const words = getWordsByCategory(category);
+      return { words: words.length, learned: words.filter((w) => studied.has(w.id)).length };
+    };
+    return { top100: count('top100'), top500: count('top500'), top1000: count('top1000'), all: count('all') };
+  }, [cards]);
+
   if (!isLoaded) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-shell-100 dark:bg-slate-950">
-        <div className="text-center">
-          <div className="animate-spin w-12 h-12 border-4 border-forest-100 border-t-forest-600 rounded-full mx-auto mb-4"></div>
-          <p className="text-stone-600 dark:text-gray-400">Lädt...</p>
+      <div className="flex items-center justify-center min-h-screen">
+        <Backdrop />
+        <div className="glass rounded-3xl px-8 py-7 text-center">
+          <div className="animate-spin w-10 h-10 border-4 border-forest-100 border-t-forest-600 rounded-full mx-auto mb-3"></div>
+          <p className="font-semibold text-muted dark:text-gray-300">Lädt...</p>
         </div>
       </div>
     );
   }
 
-  return (
-    <div className="min-h-screen bg-shell-100 dark:bg-slate-950 text-stone-900 dark:text-gray-100">
-      {currentMode !== 'study' && (
-        <Navigation currentMode={currentMode} onModeChange={setCurrentMode} />
-      )}
+  const dailyDone = dailyTask ? isDailyTaskDone(dailyTask) : false;
+  const dailyProgress = dailyTask ? dailyTask.completedLevels.length / LEVEL_LABELS.length : 0;
+  const RING = 2 * Math.PI * 31;
 
-      <main className="max-w-xl mx-auto px-5 py-8">
+  return (
+    <div className="min-h-screen text-ink dark:text-gray-100">
+      <Backdrop />
+
+      <main className={`w-full max-w-md mx-auto px-5 ${currentMode === 'study' ? 'pb-10' : 'pb-36'}`}>
         {currentMode === 'home' && (
-          <div className="space-y-6">
+          <div className="space-y-[18px]">
+            <ScreenHeader eyebrow={todayLabel()} title={greeting()} onSettings={() => setCurrentMode('settings')} />
+
             {dailyTask && (
-              <button
-                onClick={handleStartDaily}
-                className={`w-full px-6 py-5 rounded-2xl text-left transition active:scale-[0.98] ${
-                  isDailyTaskDone(dailyTask)
-                    ? 'bg-forest-50 dark:bg-forest-950/40 ring-1 ring-forest-100 dark:ring-forest-900'
-                    : 'bg-gradient-to-br from-forest-500 to-forest-700 text-white shadow-lg shadow-forest-600/25'
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <span className="font-semibold">Tagesaufgabe</span>
-                  <span
-                    className={`text-sm font-medium ${
-                      isDailyTaskDone(dailyTask) ? 'text-forest-700 dark:text-forest-300' : 'text-white/80'
-                    }`}
-                  >
-                    {isDailyTaskDone(dailyTask) ? '✓ geschafft' : `${dailyTask.wordIds.length} Wörter`}
-                  </span>
+              <section className="glass-hero rounded-[33px] p-[22px] flex flex-col gap-[18px] text-white">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex flex-col gap-1.5">
+                    <span className="text-xs font-bold tracking-[0.08em] uppercase text-white/90">Tagesaufgabe</span>
+                    <span className="font-display font-bold text-[26px] leading-[1.1]">
+                      {dailyDone ? 'Geschafft!' : `${dailyTask.wordIds.length} Wörter`}
+                    </span>
+                    <div className="flex gap-1.5 mt-1">
+                      {LEVEL_LABELS.map(({ id, label }) => {
+                        const done = dailyTask.completedLevels.includes(id);
+                        const next = !dailyDone && nextDailyLevel(dailyTask, level) === id;
+                        return (
+                          <span
+                            key={id}
+                            className={`text-xs px-2.5 py-1 rounded-full font-bold ${
+                              next ? 'bg-white text-forest-800' : done ? 'bg-white/25 text-white' : 'bg-white/15 text-white'
+                            }`}
+                          >
+                            {done ? '✓ ' : ''}
+                            {label}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  </div>
+                  <div className="relative w-[76px] h-[76px] shrink-0">
+                    <svg viewBox="0 0 76 76" className="w-full h-full" aria-hidden>
+                      <circle cx="38" cy="38" r="31" fill="none" stroke="rgb(255 255 255 / 0.22)" strokeWidth="8" />
+                      {dailyProgress > 0 && (
+                        <circle
+                          cx="38"
+                          cy="38"
+                          r="31"
+                          fill="none"
+                          stroke="#fff"
+                          strokeWidth="8"
+                          strokeLinecap="round"
+                          strokeDasharray={`${dailyProgress * RING} ${RING}`}
+                          transform="rotate(-90 38 38)"
+                        />
+                      )}
+                    </svg>
+                    <span className="absolute inset-0 flex items-center justify-center font-bold">
+                      {dailyTask.completedLevels.length}/{LEVEL_LABELS.length}
+                    </span>
+                  </div>
                 </div>
-                <div className="mt-3 flex gap-2">
-                  {LEVEL_LABELS.map(({ id, label }) => {
-                    const done = dailyTask.completedLevels.includes(id);
-                    const next = !isDailyTaskDone(dailyTask) && nextDailyLevel(dailyTask, level) === id;
-                    return (
-                      <span
-                        key={id}
-                        className={`text-xs px-2.5 py-1 rounded-full font-medium ${
-                          isDailyTaskDone(dailyTask)
-                            ? 'bg-forest-100 dark:bg-forest-900 text-forest-700 dark:text-forest-300'
-                            : next
-                              ? 'bg-white text-forest-700'
-                              : 'bg-white/20 text-white'
-                        }`}
-                      >
-                        {done ? '✓ ' : ''}
-                        {label}
-                      </span>
-                    );
-                  })}
-                </div>
-              </button>
+                <button
+                  onClick={handleStartDaily}
+                  className="h-[52px] rounded-2xl bg-white/90 shadow-[inset_0_1px_0_#fff] text-ink font-bold flex items-center justify-center gap-2.5 active:scale-[0.98] transition"
+                >
+                  {dailyDone ? 'Nochmal üben' : dailyTask.completedLevels.length > 0 ? 'Weiterlernen' : 'Starten'}
+                  <svg viewBox="0 0 24 24" className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                    <path d="M5 12h14" />
+                    <path d="m13 6 6 6-6 6" />
+                  </svg>
+                </button>
+              </section>
             )}
 
-            <div className="text-center py-6">
-              <p className="text-6xl font-bold tracking-tight tabular-nums">{dueCards.length}</p>
-              <p className="mt-1 text-sm font-medium uppercase tracking-wider text-forest-600 dark:text-forest-400">fällig</p>
+            <div className="grid grid-cols-3 gap-2.5">
+              {[
+                { label: 'Fällig', value: dueCards.length },
+                { label: 'Heute', value: stats.todayReviews },
+                { label: 'Genauigkeit', value: `${stats.accuracy}%` },
+              ].map(({ label, value }) => (
+                <div key={label} className="glass rounded-[18px] px-3.5 py-3 flex flex-col gap-0.5">
+                  <span className="font-display font-bold text-[22px] tabular-nums">{value}</span>
+                  <span className="text-xs font-semibold text-muted dark:text-gray-300">{label}</span>
+                </div>
+              ))}
             </div>
 
-            <CategorySelector
-              selectedCategory={selectedCategory}
-              onCategoryChange={setSelectedCategory}
-            />
+            <section className="flex flex-col gap-2.5">
+              <h2 className="m-0 text-[13px] font-bold tracking-[0.06em] uppercase text-muted dark:text-gray-300">Richtung</h2>
+              <DirectionToggle direction={direction} onDirectionChange={handleDirectionChange} />
+            </section>
 
-            <DirectionToggle direction={direction} onDirectionChange={handleDirectionChange} />
+            <section className="flex flex-col gap-2.5">
+              <h2 className="m-0 text-[13px] font-bold tracking-[0.06em] uppercase text-muted dark:text-gray-300">Wortschatz</h2>
+              <CategorySelector
+                selectedCategory={selectedCategory}
+                onCategoryChange={setSelectedCategory}
+                counts={categoryCounts}
+              />
+            </section>
 
             <button
               onClick={handleStartStudy}
-              className="w-full py-4 rounded-2xl text-lg bg-forest-600 hover:bg-forest-700 active:scale-[0.98] text-white font-medium shadow-lg shadow-forest-600/25 transition"
+              className="w-full h-14 rounded-2xl bg-ink dark:bg-white text-white dark:text-ink font-bold text-base shadow-[0_12px_28px_-14px_rgb(20_32_27/0.7)] active:scale-[0.98] transition"
             >
-              Start
+              Fällige Karten lernen
             </button>
           </div>
         )}
@@ -260,23 +319,29 @@ function App() {
         )}
 
         {currentMode === 'stats' && (
-          <div className="space-y-10">
+          <div className="space-y-[18px]">
+            <ScreenHeader eyebrow="Dein Fortschritt" title="Statistik" onSettings={() => setCurrentMode('settings')} />
             <DirectionToggle direction={direction} onDirectionChange={handleDirectionChange} />
-            <StatsComponent stats={stats} />
+            <StatsComponent stats={stats} direction={direction} />
           </div>
         )}
 
         {currentMode === 'settings' && (
-          <Settings
-            level={level}
-            onLevelChange={handleLevelChange}
-            theme={theme}
-            onThemeChange={handleThemeChange}
-            onReset={resetAllProgress}
-            onResetDaily={handleResetDaily}
-          />
+          <div className="space-y-[18px]">
+            <ScreenHeader eyebrow="App" title="Einstellungen" settingsActive onSettings={() => setCurrentMode('home')} />
+            <Settings
+              level={level}
+              onLevelChange={handleLevelChange}
+              theme={theme}
+              onThemeChange={handleThemeChange}
+              onReset={resetAllProgress}
+              onResetDaily={handleResetDaily}
+            />
+          </div>
         )}
       </main>
+
+      {currentMode !== 'study' && <Navigation currentMode={currentMode} onModeChange={setCurrentMode} />}
     </div>
   );
 }

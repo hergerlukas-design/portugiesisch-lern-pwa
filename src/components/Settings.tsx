@@ -61,44 +61,46 @@ export const Settings: React.FC<SettingsProps> = ({
   };
 
   return (
-    <div className="space-y-10">
-      <h2 className="text-2xl font-bold tracking-tight">Einstellungen</h2>
-
-      <div>
-        <p className="text-sm text-stone-500 dark:text-gray-400 mb-3">Niveau</p>
-        <Segmented options={LEVELS} value={level} onChange={onLevelChange} />
-        <p className="mt-2 text-xs text-stone-500 dark:text-gray-400">
+    <div className="space-y-3.5">
+      <section className="glass rounded-3xl p-[18px] space-y-3">
+        <h2 className="m-0 text-[13px] font-bold tracking-[0.06em] uppercase text-muted dark:text-gray-300">Niveau</h2>
+        <Segmented options={LEVELS} value={level} onChange={onLevelChange} label="Niveau" />
+        <p className="text-xs font-medium text-muted dark:text-gray-300">
           {level === 'beginner' ? '4 Antworten zur Auswahl' : 'Antwort selbst eintippen'}
         </p>
-      </div>
+      </section>
 
-      <div>
-        <p className="text-sm text-stone-500 dark:text-gray-400 mb-3">Darstellung</p>
-        <Segmented options={THEMES} value={theme} onChange={onThemeChange} />
-      </div>
+      <section className="glass rounded-3xl p-[18px] space-y-3">
+        <h2 className="m-0 text-[13px] font-bold tracking-[0.06em] uppercase text-muted dark:text-gray-300">Darstellung</h2>
+        <Segmented options={THEMES} value={theme} onChange={onThemeChange} label="Darstellung" />
+      </section>
 
       <button
         onClick={handleUpdate}
         disabled={updating}
-        className="w-full py-3 rounded-xl border border-forest-600 dark:border-forest-400 text-forest-700 dark:text-forest-300 font-medium hover:bg-forest-50 dark:hover:bg-forest-950/40 disabled:opacity-60 transition"
+        className="glass w-full h-14 rounded-2xl flex items-center justify-center gap-2 font-bold text-forest-800 dark:text-forest-200 disabled:opacity-60 transition active:scale-[0.98]"
       >
-        {updating ? 'Wird aktualisiert…' : '↻ App aktualisieren'}
+        <svg viewBox="0 0 24 24" className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+          <path d="M21 12a9 9 0 1 1-3-6.7L21 8" />
+          <path d="M21 3v5h-5" />
+        </svg>
+        {updating ? 'Wird aktualisiert…' : 'App aktualisieren'}
       </button>
 
-      <div className="space-y-4">
+      <section className="glass rounded-3xl p-2 flex flex-col">
         <button
           onClick={handleResetDaily}
-          className="block text-sm text-stone-500 dark:text-gray-400 hover:text-forest-700 dark:hover:text-forest-300 transition-colors"
+          className="h-12 px-3 rounded-2xl text-left text-sm font-semibold text-ink dark:text-white hover:bg-white/50 dark:hover:bg-white/10 transition-colors"
         >
-          {dailyReset ? '✓ Tagesaufgabe zurückgesetzt' : 'Tagesaufgabe zurücksetzen'}
+          {dailyReset ? 'Tagesaufgabe zurückgesetzt' : 'Tagesaufgabe zurücksetzen'}
         </button>
         <button
           onClick={handleReset}
-          className="block text-sm text-stone-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+          className="h-12 px-3 rounded-2xl text-left text-sm font-semibold text-red-800 dark:text-red-300 hover:bg-white/50 dark:hover:bg-white/10 transition-colors"
         >
           Fortschritt zurücksetzen
         </button>
-      </div>
+      </section>
     </div>
   );
 };

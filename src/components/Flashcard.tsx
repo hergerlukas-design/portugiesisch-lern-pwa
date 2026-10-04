@@ -46,15 +46,15 @@ export const Flashcard: React.FC<FlashcardProps> = ({ word, direction, level, on
 
   const choiceClass = (option: string) => {
     if (!revealed) {
-      return 'border-shell-300 dark:border-slate-700 hover:border-forest-300 hover:bg-forest-50 dark:hover:bg-forest-950/40';
+      return 'glass text-ink dark:text-white hover:border-forest-400!';
     }
     if (option === answer) {
-      return 'border-forest-500 bg-forest-50 dark:bg-forest-950/40 text-forest-700 dark:text-forest-300';
+      return 'glass-active border-2 border-forest-600! text-forest-800 dark:text-forest-200';
     }
     if (option === chosen) {
-      return 'border-red-500 bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300';
+      return 'glass-active border-2 border-red-600! text-red-800 dark:text-red-300';
     }
-    return 'border-shell-300 dark:border-slate-700 opacity-40';
+    return 'glass text-ink dark:text-white opacity-45';
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -69,13 +69,20 @@ export const Flashcard: React.FC<FlashcardProps> = ({ word, direction, level, on
   };
 
   const flipHint = (
-    <span aria-hidden className="absolute top-3 right-4 text-lg text-stone-300 dark:text-slate-600">
-      ↻
+    <svg viewBox="0 0 24 24" className="absolute top-5 right-5 w-5 h-5 text-muted/60 dark:text-gray-400" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M21 12a9 9 0 1 1-3-6.7L21 8" />
+      <path d="M21 3v5h-5" />
+    </svg>
+  );
+
+  const sideLabel = (portuguese: boolean) => (
+    <span className="absolute top-6 left-6 text-xs font-bold tracking-[0.08em] uppercase text-muted dark:text-gray-300">
+      {portuguese ? 'Português' : 'Deutsch'}
     </span>
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <button
         type="button"
         onClick={toggleFlip}
@@ -85,30 +92,34 @@ export const Flashcard: React.FC<FlashcardProps> = ({ word, direction, level, on
         <div className={`flashcard-inner ${flipped ? 'flipped' : ''}`}>
           {/* Front - prompt side */}
           <div className="flashcard-front">
+            {sideLabel(ptFirst)}
             {flipHint}
             <div className="text-center px-6">
-              <p className="text-3xl font-semibold text-stone-900 dark:text-white">{prompt}</p>
+              <p className="font-display font-extrabold text-[44px] leading-none tracking-tight text-ink dark:text-white">{prompt}</p>
               {promptExample && (
-                <p className="mt-4 text-sm text-stone-500 dark:text-gray-400 italic">{promptExample}</p>
+                <p className="mt-5 text-sm font-medium text-muted dark:text-gray-300">{promptExample}</p>
               )}
             </div>
           </div>
 
           {/* Back - answer side */}
           <div className="flashcard-back">
+            {sideLabel(!ptFirst)}
             {flipHint}
             <div className="text-center px-6">
-              <p className="text-3xl font-semibold text-stone-900 dark:text-white">{answer}</p>
+              <p className="font-display font-bold text-[40px] leading-none tracking-tight text-forest-600 dark:text-forest-300">{answer}</p>
               {answerExample && (
-                <p className="mt-4 text-sm text-stone-500 dark:text-gray-400 italic">{answerExample}</p>
+                <p className="mt-5 text-sm font-medium text-muted dark:text-gray-300">{answerExample}</p>
               )}
               {answered && (
                 <p
-                  className={`mt-6 text-sm font-medium ${
-                    correct ? 'text-forest-600 dark:text-forest-400' : 'text-red-600 dark:text-red-400'
+                  className={`inline-block mt-5 px-3 py-1.5 rounded-full text-[13px] font-bold ${
+                    correct
+                      ? 'bg-forest-50/90 text-forest-800 dark:bg-forest-900/60 dark:text-forest-200'
+                      : 'bg-red-50/90 text-red-800 dark:bg-red-950/60 dark:text-red-300'
                   }`}
                 >
-                  {correct ? '✓ Richtig' : `✗ Deine Antwort: ${given}`}
+                  {correct ? 'Richtig!' : `Deine Antwort: ${given}`}
                 </p>
               )}
             </div>
@@ -123,7 +134,7 @@ export const Flashcard: React.FC<FlashcardProps> = ({ word, direction, level, on
               key={option}
               onClick={() => choose(option)}
               disabled={revealed}
-              className={`py-3 px-2 rounded-xl border font-medium transition-colors ${choiceClass(option)}`}
+              className={`min-h-14 py-3 px-2 rounded-2xl font-semibold text-[15px] transition ${choiceClass(option)}`}
             >
               {option}
             </button>
@@ -133,7 +144,7 @@ export const Flashcard: React.FC<FlashcardProps> = ({ word, direction, level, on
 
       {!revealed ? (
         level === 'advanced' && (
-        <form onSubmit={handleSubmit} className="flex gap-2">
+        <form onSubmit={handleSubmit} className="flex gap-2.5">
           <input
             ref={inputRef}
             type="text"
@@ -143,27 +154,28 @@ export const Flashcard: React.FC<FlashcardProps> = ({ word, direction, level, on
             autoCapitalize="off"
             autoCorrect="off"
             spellCheck={false}
-            className="flex-1 min-w-0 px-4 py-3 rounded-xl border border-shell-300 dark:border-slate-700 bg-shell-50 dark:bg-slate-900 text-stone-900 dark:text-white focus:outline-none focus:border-forest-500 focus:ring-4 focus:ring-forest-100 dark:focus:ring-forest-950 transition"
+            aria-label={ptFirst ? 'Antwort auf Deutsch' : 'Antwort auf Portugiesisch'}
+            className="glass flex-1 min-w-0 h-14 px-4 rounded-2xl text-lg font-semibold text-ink dark:text-white placeholder:text-muted/70 dark:placeholder:text-gray-400 focus:outline-none focus:border-forest-600! focus:border-2 transition"
           />
           <button
             type="submit"
-            className="px-5 py-3 rounded-xl bg-forest-600 hover:bg-forest-700 active:scale-[0.98] text-white font-medium shadow-lg shadow-forest-600/25 transition"
+            className="h-14 px-[22px] rounded-2xl bg-ink dark:bg-white text-white dark:text-ink font-bold text-base active:scale-[0.98] transition"
           >
             {answered ? 'Prüfen' : 'Zeigen'}
           </button>
         </form>
         )
       ) : (
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 gap-2.5">
           <button
             onClick={() => onSubmit(outcome, true, given)}
-            className="py-3 rounded-xl border border-shell-300 dark:border-slate-700 hover:bg-shell-100 dark:hover:bg-slate-800 text-red-600 dark:text-red-400 font-medium transition-colors"
+            className="glass min-h-14 rounded-2xl text-red-800 dark:text-red-300 font-bold transition active:scale-[0.98]"
           >
             Nochmal
           </button>
           <button
             onClick={() => onSubmit(outcome, false, given)}
-            className="py-3 rounded-xl bg-forest-600 hover:bg-forest-700 active:scale-[0.98] text-white font-medium shadow-lg shadow-forest-600/25 transition"
+            className="min-h-14 rounded-2xl bg-forest-600 text-white font-bold shadow-[0_10px_24px_-12px_rgb(20_72_47/0.7),inset_0_1.5px_0_rgb(255_255_255/0.35)] active:scale-[0.98] transition"
           >
             Weiter
           </button>

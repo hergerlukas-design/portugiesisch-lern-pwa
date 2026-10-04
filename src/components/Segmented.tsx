@@ -2,27 +2,35 @@ interface SegmentedProps<T extends string> {
   options: { id: T; label: string }[];
   value: T;
   onChange: (value: T) => void;
+  label?: string;
 }
 
-export function Segmented<T extends string>({ options, value, onChange }: SegmentedProps<T>) {
+export function Segmented<T extends string>({ options, value, onChange, label }: SegmentedProps<T>) {
   return (
     <div
-      className="grid gap-1 p-1 rounded-xl bg-shell-200/80 dark:bg-slate-900"
+      role="radiogroup"
+      aria-label={label}
+      className="glass-track grid gap-1 p-1 rounded-[18px]"
       style={{ gridTemplateColumns: `repeat(${options.length}, minmax(0, 1fr))` }}
     >
-      {options.map((option) => (
-        <button
-          key={option.id}
-          onClick={() => onChange(option.id)}
-          className={`py-2 rounded-lg text-sm transition-colors ${
-            value === option.id
-              ? 'bg-shell-50 dark:bg-slate-800 text-forest-700 dark:text-forest-300 font-semibold shadow-sm'
-              : 'text-stone-500 dark:text-gray-400 hover:text-stone-900 dark:hover:text-white'
-          }`}
-        >
-          {option.label}
-        </button>
-      ))}
+      {options.map((option) => {
+        const active = value === option.id;
+        return (
+          <button
+            key={option.id}
+            role="radio"
+            aria-checked={active}
+            onClick={() => onChange(option.id)}
+            className={`h-11 rounded-xl text-[15px] font-bold transition ${
+              active
+                ? 'glass-active text-ink dark:text-white'
+                : 'text-muted dark:text-gray-300 hover:text-ink dark:hover:text-white'
+            }`}
+          >
+            {option.label}
+          </button>
+        );
+      })}
     </div>
   );
 }
