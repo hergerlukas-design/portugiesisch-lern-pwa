@@ -1,9 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
-import type { Word } from '../types';
+import type { Direction, Word } from '../types';
 
 interface FlashcardProps {
   word: Word;
-  onSubmit: (quality: number, userAnswer: string) => void;
+  direction: Direction;
+  // correct: typed answer matched, or (when nothing was typed) a passing self-rating
+  onSubmit: (quality: number, userAnswer: string, correct: boolean) => void;
 }
 
 // SM-2 quality per rating; below 3 counts as a failed recall
@@ -14,7 +16,7 @@ const RATINGS = [
   { quality: 5, label: 'Leicht', className: 'text-green-600 dark:text-green-400' },
 ];
 
-export const Flashcard: React.FC<FlashcardProps> = ({ word, onSubmit }) => {
+export const Flashcard: React.FC<FlashcardProps> = ({ word, direction, onSubmit }) => {
   const [flipped, setFlipped] = useState(false);
   // Once the answer has been seen, the card can be flipped back and forth freely
   const [revealed, setRevealed] = useState(false);
@@ -26,7 +28,14 @@ export const Flashcard: React.FC<FlashcardProps> = ({ word, onSubmit }) => {
     if (window.matchMedia('(pointer: fine)').matches) inputRef.current?.focus();
   }, []);
 
-  const correct = userAnswer.toLowerCase().trim() === word.portuguese.toLowerCase().trim();
+  const ptFirst = direction === 'pt-de';
+  const prompt = ptFirst ? word.portuguese : word.german;
+  const answer = ptFirst ? word.german : word.portuguese;
+  const promptExample = word.exampleSentence?.[ptFirst ? 'portuguese' : 'german'];
+  const answerExample = word.exampleSentence?.[ptFirst ? 'german' : 'portuguese'];
+
+  const typed = userAnswer.trim() !== '';
+  const correct = userAnswer.toLowerCase().trim() === answer.toLowerCase().trim();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,34 +59,30 @@ export const Flashcard: React.FC<FlashcardProps> = ({ word, onSubmit }) => {
       <button
         type="button"
         onClick={toggleFlip}
-        aria-label={flipped ? 'Karte umdrehen: Deutsch zeigen' : 'Karte umdrehen: Portugiesisch zeigen'}
+        aria-label={`Karte umdrehen: ${flipped !== ptFirst ? 'Deutsch' : 'Portugiesisch'} zeigen`}
         className="flashcard-3d block w-full cursor-pointer"
       >
         <div className={`flashcard-inner ${flipped ? 'flipped' : ''}`}>
-          {/* Front - German side */}
+          {/* Front - prompt side */}
           <div className="flashcard-front">
             {flipHint}
             <div className="text-center px-6">
-              <p className="text-3xl font-semibold text-gray-900 dark:text-white">{word.german}</p>
-              {word.exampleSentence && (
-                <p className="mt-4 text-sm text-gray-500 dark:text-gray-400 italic">
-                  {word.exampleSentence.german}
-                </p>
+              <p className="text-3xl font-semibold text-gray-900 dark:text-white">{prompt}</p>
+              {promptExample && (
+                <p className="mt-4 text-sm text-gray-500 dark:text-gray-400 italic">{promptExample}</p>
               )}
             </div>
           </div>
 
-          {/* Back - Portuguese side */}
+          {/* Back - answer side */}
           <div className="flashcard-back">
             {flipHint}
             <div className="text-center px-6">
-              <p className="text-3xl font-semibold text-gray-900 dark:text-white">{word.portuguese}</p>
-              {word.exampleSentence && (
-                <p className="mt-4 text-sm text-gray-500 dark:text-gray-400 italic">
-                  {word.exampleSentence.portuguese}
-                </p>
+              <p className="text-3xl font-semibold text-gray-900 dark:text-white">{answer}</p>
+              {answerExample && (
+                <p className="mt-4 text-sm text-gray-500 dark:text-gray-400 italic">{answerExample}</p>
               )}
-              {userAnswer.trim() && (
+              {typed && (
                 <p
                   className={`mt-6 text-sm font-medium ${
                     correct ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
@@ -98,7 +103,7 @@ export const Flashcard: React.FC<FlashcardProps> = ({ word, onSubmit }) => {
             type="text"
             value={userAnswer}
             onChange={(e) => setUserAnswer(e.target.value)}
-            placeholder="Auf Portugiesisch…"
+            placeholder={ptFirst ? 'Auf Deutsch…' : 'Auf Portugiesisch…'}
             autoCapitalize="off"
             autoCorrect="off"
             spellCheck={false}
@@ -108,7 +113,7 @@ export const Flashcard: React.FC<FlashcardProps> = ({ word, onSubmit }) => {
             type="submit"
             className="px-5 py-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium transition-colors"
           >
-            {userAnswer.trim() ? 'Prüfen' : 'Zeigen'}
+            {typed ? 'Prüfen' : 'Zeigen'}
           </button>
         </form>
       ) : (
@@ -116,7 +121,7 @@ export const Flashcard: React.FC<FlashcardProps> = ({ word, onSubmit }) => {
           {RATINGS.map(({ quality, label, className }) => (
             <button
               key={quality}
-              onClick={() => onSubmit(quality, userAnswer)}
+              onClick={() => onSubmit(quality, userAnswer, typed ? correct : quality >= 3)}
               className={`py-3 rounded-lg border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800 text-sm font-medium transition-colors ${className}`}
             >
               {label}

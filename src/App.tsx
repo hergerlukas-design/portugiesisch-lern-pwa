@@ -1,16 +1,37 @@
 import { useEffect, useState } from 'react';
 import { Navigation } from './components/Navigation';
 import { CategorySelector } from './components/CategorySelector';
+import { DirectionToggle } from './components/DirectionToggle';
 import { StudyMode } from './components/StudyMode';
 import { StatsComponent } from './components/Stats';
 import { useProgress } from './lib/useProgress';
 import { getWordIds, getWordsByCategory } from './data/words';
-import type { Card } from './types';
+import type { Card, Direction } from './types';
+
+const DIRECTION_KEY = 'studyDirection';
+
+function loadDirection(): Direction {
+  try {
+    return localStorage.getItem(DIRECTION_KEY) === 'pt-de' ? 'pt-de' : 'de-pt';
+  } catch {
+    return 'de-pt';
+  }
+}
 
 function App() {
   const [currentMode, setCurrentMode] = useState<'home' | 'study' | 'stats'>('home');
   const [selectedCategory, setSelectedCategory] = useState<'all' | 'top100' | 'top500' | 'top1000'>('top100');
   const [cardsForStudy, setCardsForStudy] = useState<Card[]>([]);
+  const [direction, setDirection] = useState<Direction>(loadDirection);
+
+  const handleDirectionChange = (newDirection: Direction) => {
+    setDirection(newDirection);
+    try {
+      localStorage.setItem(DIRECTION_KEY, newDirection);
+    } catch {
+      // Preference just won't persist
+    }
+  };
 
   const {
     cards,
@@ -55,12 +76,12 @@ function App() {
     setCurrentMode('study');
   };
 
-  const handleCardComplete = (wordId: string, quality: number, userAnswer: string) => {
-    const correct =
-      getWordsByCategory('all').find((w) => w.id === wordId)?.portuguese
-        .toLowerCase()
-        .trim() === userAnswer.toLowerCase().trim();
-
+  const handleCardComplete = (
+    wordId: string,
+    quality: number,
+    userAnswer: string,
+    correct: boolean
+  ) => {
     recordProgress(wordId, quality, userAnswer, correct);
   };
 
@@ -96,6 +117,8 @@ function App() {
               onCategoryChange={setSelectedCategory}
             />
 
+            <DirectionToggle direction={direction} onDirectionChange={handleDirectionChange} />
+
             <button
               onClick={handleStartStudy}
               className="w-full py-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-lg font-medium transition-colors"
@@ -108,6 +131,7 @@ function App() {
         {currentMode === 'study' && (
           <StudyMode
             cards={cardsForStudy}
+            direction={direction}
             onCardComplete={handleCardComplete}
             onFinish={() => setCurrentMode('home')}
           />

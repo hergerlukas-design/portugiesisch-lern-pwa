@@ -80,3 +80,8 @@ export interface StudySession {
     startTime: Date;
   };
 }
+
+/**
+ * Study direction: which language is shown on the front of the card
+ */
+export type Direction = 'de-pt' | 'pt-de';

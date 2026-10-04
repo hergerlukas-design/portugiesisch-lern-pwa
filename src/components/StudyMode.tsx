@@ -1,16 +1,18 @@
 import React, { useState } from 'react';
-import type { Card } from '../types';
+import type { Card, Direction } from '../types';
 import { Flashcard } from './Flashcard';
 import { getWordById } from '../data/words';
 
 interface StudyModeProps {
   cards: Card[];
-  onCardComplete: (wordId: string, quality: number, userAnswer: string) => void;
+  direction: Direction;
+  onCardComplete: (wordId: string, quality: number, userAnswer: string, correct: boolean) => void;
   onFinish: () => void;
 }
 
 export const StudyMode: React.FC<StudyModeProps> = ({
   cards,
+  direction,
   onCardComplete,
   onFinish,
 }) => {
@@ -39,8 +41,8 @@ export const StudyMode: React.FC<StudyModeProps> = ({
     );
   }
 
-  const handleCardComplete = (quality: number, userAnswer: string) => {
-    onCardComplete(currentCard.wordId, quality, userAnswer);
+  const handleCardComplete = (quality: number, userAnswer: string, correct: boolean) => {
+    onCardComplete(currentCard.wordId, quality, userAnswer, correct);
 
     if (currentIndex < cards.length - 1) {
       setCurrentIndex(currentIndex + 1);
@@ -71,7 +73,12 @@ export const StudyMode: React.FC<StudyModeProps> = ({
         </span>
       </div>
 
-      <Flashcard key={currentCard.wordId} word={word} onSubmit={handleCardComplete} />
+      <Flashcard
+        key={currentCard.wordId}
+        word={word}
+        direction={direction}
+        onSubmit={handleCardComplete}
+      />
     </div>
   );
 };
