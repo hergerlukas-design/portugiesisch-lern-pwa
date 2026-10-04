@@ -1,4 +1,4 @@
-import type { Card } from '../types';
+import type { Card, Level } from '../types';
 
 export const DAILY_TASK_SIZE = 10;
 
@@ -7,8 +7,11 @@ const DAILY_TASK_KEY = 'dailyTask';
 export interface DailyTask {
   date: string; // local date, YYYY-MM-DD
   wordIds: string[];
-  completed: boolean;
+  // Each level can complete the same words once
+  completedLevels: Level[];
 }
+
+const LEVEL_ORDER: Level[] = ['beginner', 'advanced'];
 
 function todayString(): string {
   const d = new Date();
@@ -53,8 +56,14 @@ export function getOrCreateDailyTask(cards: Card[]): DailyTask | null {
   try {
     const stored = localStorage.getItem(DAILY_TASK_KEY);
     if (stored) {
-      const task = JSON.parse(stored) as DailyTask;
-      if (task.date === today && task.wordIds.length > 0) return task;
+      const task = JSON.parse(stored) as DailyTask & { completed?: boolean };
+      if (task.date === today && task.wordIds.length > 0) {
+        // Older tasks stored a single flag; those were completed in beginner mode
+        if (!Array.isArray(task.completedLevels)) {
+          task.completedLevels = task.completed ? ['beginner'] : [];
+        }
+        return { date: task.date, wordIds: task.wordIds, completedLevels: task.completedLevels };
+      }
     }
   } catch {
     // Fall through and create a new task
@@ -62,13 +71,27 @@ export function getOrCreateDailyTask(cards: Card[]): DailyTask | null {
 
   const wordIds = pickWords(cards);
   if (wordIds.length === 0) return null;
-  const task = { date: today, wordIds, completed: false };
+  const task: DailyTask = { date: today, wordIds, completedLevels: [] };
   save(task);
   return task;
 }
 
-export function markDailyTaskCompleted(task: DailyTask): DailyTask {
-  const completed = { ...task, completed: true };
+export function markDailyTaskCompleted(task: DailyTask, level: Level): DailyTask {
+  if (task.completedLevels.includes(level)) return task;
+  const completed = { ...task, completedLevels: [...task.completedLevels, level] };
   save(completed);
   return completed;
+}
+
+/**
+ * Level for the next daily run: the preferred one if still open, else the other open
+ * one; once both are done, practice continues in the preferred level
+ */
+export function nextDailyLevel(task: DailyTask, preferred: Level): Level {
+  if (!task.completedLevels.includes(preferred)) return preferred;
+  return LEVEL_ORDER.find((l) => !task.completedLevels.includes(l)) ?? preferred;
+}
+
+export function isDailyTaskDone(task: DailyTask): boolean {
+  return LEVEL_ORDER.every((l) => task.completedLevels.includes(l));
 }

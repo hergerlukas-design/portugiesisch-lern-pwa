@@ -9,13 +9,20 @@ import { useProgress } from './lib/useProgress';
 import { applyTheme, loadTheme, saveTheme } from './lib/theme';
 import {
   getOrCreateDailyTask,
+  isDailyTaskDone,
   markDailyTaskCompleted,
+  nextDailyLevel,
   type DailyTask,
 } from './lib/dailyTask';
 import { getWordIds, getWordsByCategory } from './data/words';
 import type { Card, Direction, Level, Outcome, Theme } from './types';
 
 const DIRECTION_KEY = 'studyDirection';
+
+const LEVEL_LABELS: { id: Level; label: string }[] = [
+  { id: 'beginner', label: 'Anfänger' },
+  { id: 'advanced', label: 'Fortgeschritten' },
+];
 const LEVEL_KEY = 'studyLevel';
 
 // Saved choice if it is one of `allowed`, else the first allowed value
@@ -40,7 +47,7 @@ function App() {
   const [currentMode, setCurrentMode] = useState<'home' | 'study' | 'stats' | 'settings'>('home');
   const [selectedCategory, setSelectedCategory] = useState<'all' | 'top100' | 'top500' | 'top1000'>('top100');
   // Cards of the running session, fixed at start so ratings don't reshuffle it
-  const [session, setSession] = useState<{ cards: Card[]; daily: boolean } | null>(null);
+  const [session, setSession] = useState<{ cards: Card[]; daily: boolean; level: Level } | null>(null);
   const [dailyTask, setDailyTask] = useState<DailyTask | null>(null);
   // Words already recorded in this daily session (only the first answer counts for SM-2)
   const recordedInSession = useRef(new Set<string>());
@@ -98,9 +105,9 @@ function App() {
     }
   }, [cards, dailyTask]);
 
-  const startSession = (sessionCards: Card[], daily: boolean) => {
+  const startSession = (sessionCards: Card[], daily: boolean, sessionLevel: Level = level) => {
     recordedInSession.current = new Set();
-    setSession({ cards: sessionCards, daily });
+    setSession({ cards: sessionCards, daily, level: sessionLevel });
     setCurrentMode('study');
   };
 
@@ -121,7 +128,7 @@ function App() {
     const taskCards = dailyTask.wordIds
       .map((id) => cards.find((card) => card.wordId === id))
       .filter((card): card is Card => !!card);
-    startSession(taskCards, true);
+    startSession(taskCards, true, nextDailyLevel(dailyTask, level));
   };
 
   const handleCardComplete = (wordId: string, outcome: Outcome, userAnswer: string) => {
@@ -131,7 +138,8 @@ function App() {
     // Daily task: only the first answer per word on the first run feeds spaced repetition;
     // retries and repeat runs are practice
     if (session?.daily) {
-      if (dailyTask?.completed || recordedInSession.current.has(wordId)) return;
+      // Spaced repetition only learns from the day's first completed run
+      if (dailyTask?.completedLevels.length || recordedInSession.current.has(wordId)) return;
       recordedInSession.current.add(wordId);
     }
     const correct = outcome === 'correct';
@@ -140,8 +148,8 @@ function App() {
   };
 
   const handleDailyComplete = () => {
-    if (session?.daily && dailyTask && !dailyTask.completed) {
-      setDailyTask(markDailyTaskCompleted(dailyTask));
+    if (session?.daily && dailyTask) {
+      setDailyTask(markDailyTaskCompleted(dailyTask, session.level));
     }
   };
 
@@ -170,22 +178,43 @@ function App() {
             {dailyTask && (
               <button
                 onClick={handleStartDaily}
-                className={`w-full flex items-center justify-between px-6 py-5 rounded-2xl transition active:scale-[0.98] ${
-                  dailyTask.completed
+                className={`w-full px-6 py-5 rounded-2xl text-left transition active:scale-[0.98] ${
+                  isDailyTaskDone(dailyTask)
                     ? 'bg-forest-50 dark:bg-forest-950/40 ring-1 ring-forest-100 dark:ring-forest-900'
                     : 'bg-gradient-to-br from-forest-500 to-forest-700 text-white shadow-lg shadow-forest-600/25'
                 }`}
               >
-                <span className="font-semibold">Tagesaufgabe</span>
-                <span
-                  className={`text-sm px-3 py-1 rounded-full font-medium ${
-                    dailyTask.completed
-                      ? 'text-forest-700 dark:text-forest-300'
-                      : 'bg-white/20 text-white'
-                  }`}
-                >
-                  {dailyTask.completed ? '✓ geschafft' : `${dailyTask.wordIds.length} Wörter`}
-                </span>
+                <div className="flex items-center justify-between">
+                  <span className="font-semibold">Tagesaufgabe</span>
+                  <span
+                    className={`text-sm font-medium ${
+                      isDailyTaskDone(dailyTask) ? 'text-forest-700 dark:text-forest-300' : 'text-white/80'
+                    }`}
+                  >
+                    {isDailyTaskDone(dailyTask) ? '✓ geschafft' : `${dailyTask.wordIds.length} Wörter`}
+                  </span>
+                </div>
+                <div className="mt-3 flex gap-2">
+                  {LEVEL_LABELS.map(({ id, label }) => {
+                    const done = dailyTask.completedLevels.includes(id);
+                    const next = !isDailyTaskDone(dailyTask) && nextDailyLevel(dailyTask, level) === id;
+                    return (
+                      <span
+                        key={id}
+                        className={`text-xs px-2.5 py-1 rounded-full font-medium ${
+                          isDailyTaskDone(dailyTask)
+                            ? 'bg-forest-100 dark:bg-forest-900 text-forest-700 dark:text-forest-300'
+                            : next
+                              ? 'bg-white text-forest-700'
+                              : 'bg-white/20 text-white'
+                        }`}
+                      >
+                        {done ? '✓ ' : ''}
+                        {label}
+                      </span>
+                    );
+                  })}
+                </div>
               </button>
             )}
 
@@ -214,7 +243,7 @@ function App() {
           <StudyMode
             cards={session.cards}
             direction={direction}
-            level={level}
+            level={session.level}
             repeatUntilCorrect={session.daily}
             onCardComplete={handleCardComplete}
             onComplete={handleDailyComplete}
