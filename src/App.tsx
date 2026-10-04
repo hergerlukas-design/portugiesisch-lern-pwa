@@ -88,7 +88,7 @@ function App() {
           <div className="space-y-6">
             <div className="text-center py-6">
               <p className="text-5xl font-semibold tabular-nums">{cardsForStudy.length}</p>
-              <p className="mt-1 text-gray-500 dark:text-gray-400">Karten heute fällig</p>
+              <p className="mt-1 text-gray-500 dark:text-gray-400">fällig</p>
             </div>
 
             <CategorySelector
@@ -100,12 +100,8 @@ function App() {
               onClick={handleStartStudy}
               className="w-full py-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-lg font-medium transition-colors"
             >
-              Lernen starten
+              Start
             </button>
-
-            <p className="text-center text-sm text-gray-500 dark:text-gray-400">
-              {stats.masteredCards} gemeistert · {stats.accuracy}% Genauigkeit
-            </p>
           </div>
         )}
 

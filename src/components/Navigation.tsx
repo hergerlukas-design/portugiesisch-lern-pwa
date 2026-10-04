@@ -15,8 +15,7 @@ const TABS: { mode: Mode; label: string }[] = [
 export const Navigation: React.FC<NavigationProps> = ({ currentMode, onModeChange }) => {
   return (
     <header className="border-b border-gray-200 dark:border-slate-800">
-      <div className="max-w-xl mx-auto px-4 h-14 flex items-center justify-between">
-        <h1 className="font-semibold text-gray-900 dark:text-white">Português Lernen</h1>
+      <div className="max-w-xl mx-auto px-4 h-14 flex items-center justify-center">
         <nav className="flex gap-1">
           {TABS.map(({ mode, label }) => (
             <button
