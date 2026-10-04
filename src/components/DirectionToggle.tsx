@@ -13,7 +13,7 @@ const DIRECTIONS: { id: Direction; label: string }[] = [
 ];
 
 export const DirectionToggle: React.FC<DirectionToggleProps> = ({ direction, onDirectionChange }) => (
-  <Segmented options={DIRECTIONS} value={direction} onChange={onDirectionChange} />
+  <Segmented options={DIRECTIONS} value={direction} onChange={onDirectionChange} label="Lernrichtung" />
 );
 
 export default DirectionToggle;

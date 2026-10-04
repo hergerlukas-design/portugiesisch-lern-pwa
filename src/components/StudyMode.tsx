@@ -32,11 +32,11 @@ export const StudyMode: React.FC<StudyModeProps> = ({
 
   if (cards.length === 0) {
     return (
-      <div className="text-center py-16">
-        <p className="text-stone-500 dark:text-gray-400 mb-6">Keine Karten zum Lernen verfügbar</p>
+      <div className="glass rounded-[28px] text-center px-6 py-12 mt-10">
+        <p className="text-muted dark:text-gray-300 font-semibold mb-6">Keine Karten zum Lernen verfügbar</p>
         <button
           onClick={onFinish}
-          className="px-5 py-2.5 rounded-lg bg-shell-200 dark:bg-slate-800 font-medium"
+          className="glass-active h-12 px-6 rounded-2xl font-bold"
         >
           Zurück
         </button>
@@ -46,12 +46,16 @@ export const StudyMode: React.FC<StudyModeProps> = ({
 
   if (finished) {
     return (
-      <div className="text-center py-16 space-y-8">
-        <div>
-          <p className="text-5xl">🎉</p>
-          <p className="mt-4 text-xl font-semibold">Alle {cards.length} richtig!</p>
+      <div className="glass rounded-[32px] text-center px-6 py-10 mt-10 space-y-8">
+        <div className="flex flex-col items-center">
+          <span className="glass-hero w-20 h-20 rounded-full flex items-center justify-center text-white">
+            <svg viewBox="0 0 24 24" className="w-9 h-9" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <path d="M20 6 9 17l-5-5" />
+            </svg>
+          </span>
+          <p className="mt-5 font-display font-bold text-2xl">Alle {cards.length} richtig!</p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex gap-2.5">
           <button
             onClick={() => {
               setQueue(cards);
@@ -59,13 +63,13 @@ export const StudyMode: React.FC<StudyModeProps> = ({
               setAttempt((a) => a + 1);
               setFinished(false);
             }}
-            className="flex-1 py-3 rounded-xl border border-shell-300 dark:border-slate-700 font-medium hover:bg-shell-100 dark:hover:bg-slate-800"
+            className="glass-active flex-1 h-14 rounded-2xl font-bold"
           >
             Nochmal
           </button>
           <button
             onClick={onFinish}
-            className="flex-1 py-3 rounded-xl bg-forest-600 hover:bg-forest-700 active:scale-[0.98] text-white font-medium shadow-lg shadow-forest-600/25 transition"
+            className="flex-1 h-14 rounded-2xl bg-forest-600 text-white font-bold shadow-[0_10px_24px_-12px_rgb(20_72_47/0.7),inset_0_1.5px_0_rgb(255_255_255/0.35)] active:scale-[0.98] transition"
           >
             Fertig
           </button>
@@ -79,7 +83,7 @@ export const StudyMode: React.FC<StudyModeProps> = ({
 
   if (!word) {
     return (
-      <p className="text-center py-16 text-red-600 dark:text-red-400">Wort nicht gefunden</p>
+      <p className="text-center py-16 font-semibold text-red-700 dark:text-red-400">Wort nicht gefunden</p>
     );
   }
 
@@ -106,25 +110,33 @@ export const StudyMode: React.FC<StudyModeProps> = ({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pt-6">
       {/* Progress */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3.5">
         <button
           onClick={onFinish}
           aria-label="Beenden"
-          className="w-8 h-8 -ml-1 flex items-center justify-center rounded-md text-xl text-stone-400 hover:text-stone-900 dark:hover:text-white"
+          className="glass w-11 h-11 shrink-0 rounded-full flex items-center justify-center text-ink dark:text-white"
         >
-          ×
+          <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+            <path d="M18 6 6 18" />
+            <path d="m6 6 12 12" />
+          </svg>
         </button>
-        <div className="flex-1 h-2 bg-shell-200 dark:bg-slate-800 rounded-full overflow-hidden">
-          <div
-            className="h-full bg-forest-500 rounded-full transition-all duration-300"
-            style={{ width: `${(doneCount / cards.length) * 100}%` }}
-          />
+        <div className="flex-1 flex flex-col gap-1.5">
+          <div className="flex justify-between text-[13px] font-bold">
+            <span>{direction === 'de-pt' ? 'DE → PT' : 'PT → DE'}</span>
+            <span className="tabular-nums text-muted dark:text-gray-300">
+              {doneCount} / {cards.length}
+            </span>
+          </div>
+          <div className="h-1.5 rounded-full bg-white/60 dark:bg-white/15 overflow-hidden">
+            <div
+              className="h-full bg-forest-600 dark:bg-forest-400 rounded-full transition-all duration-300"
+              style={{ width: `${(doneCount / cards.length) * 100}%` }}
+            />
+          </div>
         </div>
-        <span className="text-sm tabular-nums text-stone-500 dark:text-gray-400">
-          {doneCount}/{cards.length}
-        </span>
       </div>
 
       <Flashcard
