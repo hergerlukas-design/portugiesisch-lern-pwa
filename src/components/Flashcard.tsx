@@ -16,11 +16,14 @@ const RATINGS = [
 
 export const Flashcard: React.FC<FlashcardProps> = ({ word, onSubmit }) => {
   const [flipped, setFlipped] = useState(false);
+  // Once the answer has been seen, the card can be flipped back and forth freely
+  const [revealed, setRevealed] = useState(false);
   const [userAnswer, setUserAnswer] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    inputRef.current?.focus();
+    // Skip on touch devices so the keyboard doesn't cover the card for people who just flip
+    if (window.matchMedia('(pointer: fine)').matches) inputRef.current?.focus();
   }, []);
 
   const correct = userAnswer.toLowerCase().trim() === word.portuguese.toLowerCase().trim();
@@ -28,14 +31,32 @@ export const Flashcard: React.FC<FlashcardProps> = ({ word, onSubmit }) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setFlipped(true);
+    setRevealed(true);
   };
+
+  const toggleFlip = () => {
+    setFlipped((f) => !f);
+    setRevealed(true);
+  };
+
+  const flipHint = (
+    <span aria-hidden className="absolute top-3 right-4 text-lg text-gray-300 dark:text-slate-600">
+      ↻
+    </span>
+  );
 
   return (
     <div className="space-y-6">
-      <div className="flashcard-3d">
+      <button
+        type="button"
+        onClick={toggleFlip}
+        aria-label={flipped ? 'Karte umdrehen: Deutsch zeigen' : 'Karte umdrehen: Portugiesisch zeigen'}
+        className="flashcard-3d block w-full cursor-pointer"
+      >
         <div className={`flashcard-inner ${flipped ? 'flipped' : ''}`}>
           {/* Front - German side */}
           <div className="flashcard-front">
+            {flipHint}
             <div className="text-center px-6">
               <p className="text-3xl font-semibold text-gray-900 dark:text-white">{word.german}</p>
               {word.exampleSentence && (
@@ -48,6 +69,7 @@ export const Flashcard: React.FC<FlashcardProps> = ({ word, onSubmit }) => {
 
           {/* Back - Portuguese side */}
           <div className="flashcard-back">
+            {flipHint}
             <div className="text-center px-6">
               <p className="text-3xl font-semibold text-gray-900 dark:text-white">{word.portuguese}</p>
               {word.exampleSentence && (
@@ -67,9 +89,9 @@ export const Flashcard: React.FC<FlashcardProps> = ({ word, onSubmit }) => {
             </div>
           </div>
         </div>
-      </div>
+      </button>
 
-      {!flipped ? (
+      {!revealed ? (
         <form onSubmit={handleSubmit} className="flex gap-2">
           <input
             ref={inputRef}
