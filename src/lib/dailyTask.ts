@@ -12,6 +12,9 @@ export interface DailyTask {
   wordIds: string[];
   // Each level can complete the same words once
   completedLevels: Level[];
+  // Spaced repetition already learned from today's first run; survives a reset so the
+  // same answers aren't counted twice
+  scheduled: boolean;
 }
 
 const LEVEL_ORDER: Level[] = ['beginner', 'advanced'];
@@ -59,13 +62,19 @@ export function getOrCreateDailyTask(cards: Card[], direction: Direction): Daily
   try {
     const stored = localStorage.getItem(taskKey(direction));
     if (stored) {
-      const task = JSON.parse(stored) as DailyTask & { completed?: boolean };
-      if (task.date === today && task.wordIds.length > 0) {
+      const task = JSON.parse(stored) as Partial<DailyTask> & { completed?: boolean };
+      if (task.date === today && task.wordIds && task.wordIds.length > 0) {
         // Older tasks stored a single flag; those were completed in beginner mode
         if (!Array.isArray(task.completedLevels)) {
           task.completedLevels = task.completed ? ['beginner'] : [];
         }
-        return { date: task.date, direction, wordIds: task.wordIds, completedLevels: task.completedLevels };
+        return {
+          date: task.date,
+          direction,
+          wordIds: task.wordIds,
+          completedLevels: task.completedLevels,
+          scheduled: task.scheduled ?? task.completedLevels.length > 0,
+        };
       }
     }
   } catch {
@@ -74,14 +83,14 @@ export function getOrCreateDailyTask(cards: Card[], direction: Direction): Daily
 
   const wordIds = pickWords(cards);
   if (wordIds.length === 0) return null;
-  const task: DailyTask = { date: today, direction, wordIds, completedLevels: [] };
+  const task: DailyTask = { date: today, direction, wordIds, completedLevels: [], scheduled: false };
   save(task);
   return task;
 }
 
 export function markDailyTaskCompleted(task: DailyTask, level: Level): DailyTask {
   if (task.completedLevels.includes(level)) return task;
-  const completed = { ...task, completedLevels: [...task.completedLevels, level] };
+  const completed = { ...task, completedLevels: [...task.completedLevels, level], scheduled: true };
   save(completed);
   return completed;
 }
@@ -97,4 +106,25 @@ export function nextDailyLevel(task: DailyTask, preferred: Level): Level {
 
 export function isDailyTaskDone(task: DailyTask): boolean {
   return LEVEL_ORDER.every((l) => task.completedLevels.includes(l));
+}
+
+/**
+ * Clear today's completion marks in both directions so the tasks can be done again.
+ * The words stay the same.
+ */
+export function resetTodaysDailyTasks() {
+  const today = todayString();
+  for (const direction of ['de-pt', 'pt-de'] as Direction[]) {
+    try {
+      const stored = localStorage.getItem(taskKey(direction));
+      if (!stored) continue;
+      const task = JSON.parse(stored) as Partial<DailyTask> & { completed?: boolean };
+      if (task.date !== today) continue;
+      const scheduled = task.scheduled ?? (task.completed || !!task.completedLevels?.length);
+      delete task.completed;
+      save({ ...(task as DailyTask), direction, completedLevels: [], scheduled });
+    } catch {
+      // Leave that task as it is
+    }
+  }
 }

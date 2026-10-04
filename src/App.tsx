@@ -12,6 +12,7 @@ import {
   isDailyTaskDone,
   markDailyTaskCompleted,
   nextDailyLevel,
+  resetTodaysDailyTasks,
   type DailyTask,
 } from './lib/dailyTask';
 import { getWordIds, getWordsByCategory } from './data/words';
@@ -140,12 +141,18 @@ function App() {
     // retries and repeat runs are practice
     if (session?.daily) {
       // Spaced repetition only learns from the day's first completed run
-      if (dailyTask?.completedLevels.length || recordedInSession.current.has(wordId)) return;
+      if (dailyTask?.scheduled || recordedInSession.current.has(wordId)) return;
       recordedInSession.current.add(wordId);
     }
     const correct = outcome === 'correct';
     // SM-2 quality: 4 = recalled, 1 = failed
     recordProgress(wordId, correct ? 4 : 1, userAnswer, correct);
+  };
+
+  const handleResetDaily = () => {
+    resetTodaysDailyTasks();
+    // Reloaded from storage by the daily task effect
+    setDailyTask(null);
   };
 
   const handleDailyComplete = () => {
@@ -266,6 +273,7 @@ function App() {
             theme={theme}
             onThemeChange={handleThemeChange}
             onReset={resetAllProgress}
+            onResetDaily={handleResetDaily}
           />
         )}
       </main>

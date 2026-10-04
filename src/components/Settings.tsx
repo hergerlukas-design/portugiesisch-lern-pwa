@@ -8,6 +8,7 @@ interface SettingsProps {
   theme: Theme;
   onThemeChange: (theme: Theme) => void;
   onReset: () => void;
+  onResetDaily: () => void;
 }
 
 const LEVELS: { id: Level; label: string }[] = [
@@ -27,7 +28,10 @@ export const Settings: React.FC<SettingsProps> = ({
   theme,
   onThemeChange,
   onReset,
+  onResetDaily,
 }) => {
+  const [dailyReset, setDailyReset] = useState(false);
+
   const [updating, setUpdating] = useState(false);
 
   // Fetch the latest service worker and reload; pages load network-first, so the
@@ -41,6 +45,13 @@ export const Settings: React.FC<SettingsProps> = ({
       // Offline or no service worker: the reload below still picks up what it can
     }
     window.location.reload();
+  };
+
+  const handleResetDaily = () => {
+    if (confirm('Tagesaufgabe von heute zurücksetzen? Du kannst sie dann nochmal machen.')) {
+      onResetDaily();
+      setDailyReset(true);
+    }
   };
 
   const handleReset = () => {
@@ -74,12 +85,20 @@ export const Settings: React.FC<SettingsProps> = ({
         {updating ? 'Wird aktualisiert…' : '↻ App aktualisieren'}
       </button>
 
-      <button
-        onClick={handleReset}
-        className="text-sm text-stone-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
-      >
-        Fortschritt zurücksetzen
-      </button>
+      <div className="space-y-4">
+        <button
+          onClick={handleResetDaily}
+          className="block text-sm text-stone-500 dark:text-gray-400 hover:text-forest-700 dark:hover:text-forest-300 transition-colors"
+        >
+          {dailyReset ? '✓ Tagesaufgabe zurückgesetzt' : 'Tagesaufgabe zurücksetzen'}
+        </button>
+        <button
+          onClick={handleReset}
+          className="block text-sm text-stone-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+        >
+          Fortschritt zurücksetzen
+        </button>
+      </div>
     </div>
   );
 };
