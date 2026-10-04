@@ -20,9 +20,9 @@ export const StatsComponent: React.FC<StatsProps> = ({ stats, onReset, settings 
 
   const statuses = [
     { label: 'Neu', value: stats.newCards, color: 'bg-gray-200 dark:bg-slate-700' },
-    { label: 'Lernend', value: stats.learningCards, color: 'bg-emerald-200 dark:bg-emerald-900' },
-    { label: 'Wiederholen', value: stats.reviewingCards, color: 'bg-emerald-400' },
-    { label: 'Gemeistert', value: stats.masteredCards, color: 'bg-emerald-600' },
+    { label: 'Lernend', value: stats.learningCards, color: 'bg-forest-200 dark:bg-forest-900' },
+    { label: 'Wiederholen', value: stats.reviewingCards, color: 'bg-forest-400' },
+    { label: 'Gemeistert', value: stats.masteredCards, color: 'bg-forest-600' },
   ];
 
   const handleReset = () => {

@@ -1,5 +1,20 @@
 @import "tailwindcss";
 
+/* Forest green accent palette */
+@theme {
+  --color-forest-50: #f1f7f2;
+  --color-forest-100: #dcebdf;
+  --color-forest-200: #b9d7c0;
+  --color-forest-300: #8dbb98;
+  --color-forest-400: #5f9a6e;
+  --color-forest-500: #3f7d50;
+  --color-forest-600: #2f653e;
+  --color-forest-700: #255033;
+  --color-forest-800: #1e3f29;
+  --color-forest-900: #183322;
+  --color-forest-950: #0d1d13;
+}
+
 html {
   scroll-behavior: smooth;
 }
@@ -46,6 +61,6 @@ body {
 }
 
 .flashcard-back {
-  @apply bg-emerald-50 dark:bg-emerald-950/40 border-emerald-100 dark:border-emerald-900;
+  @apply bg-forest-50 dark:bg-forest-950/40 border-forest-100 dark:border-forest-900;
   transform: rotateY(180deg);
 }

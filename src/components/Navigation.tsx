@@ -23,7 +23,7 @@ export const Navigation: React.FC<NavigationProps> = ({ currentMode, onModeChang
               onClick={() => onModeChange(mode)}
               className={`px-4 py-1.5 rounded-full text-sm transition-colors ${
                 currentMode === mode
-                  ? 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 font-semibold'
+                  ? 'bg-forest-50 dark:bg-forest-950/50 text-forest-700 dark:text-forest-300 font-semibold'
                   : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
               }`}
             >

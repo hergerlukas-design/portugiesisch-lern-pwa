@@ -16,7 +16,7 @@ export function Segmented<T extends string>({ options, value, onChange }: Segmen
           onClick={() => onChange(option.id)}
           className={`py-2 rounded-lg text-sm transition-colors ${
             value === option.id
-              ? 'bg-white dark:bg-slate-800 text-emerald-700 dark:text-emerald-300 font-semibold shadow-sm'
+              ? 'bg-white dark:bg-slate-800 text-forest-700 dark:text-forest-300 font-semibold shadow-sm'
               : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
           }`}
         >

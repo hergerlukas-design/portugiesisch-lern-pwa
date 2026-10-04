@@ -146,7 +146,7 @@ function App() {
     return (
       <div className="flex items-center justify-center min-h-screen bg-white dark:bg-slate-950">
         <div className="text-center">
-          <div className="animate-spin w-12 h-12 border-4 border-emerald-100 border-t-emerald-600 rounded-full mx-auto mb-4"></div>
+          <div className="animate-spin w-12 h-12 border-4 border-forest-100 border-t-forest-600 rounded-full mx-auto mb-4"></div>
           <p className="text-gray-600 dark:text-gray-400">Lädt...</p>
         </div>
       </div>
@@ -167,15 +167,15 @@ function App() {
                 onClick={handleStartDaily}
                 className={`w-full flex items-center justify-between px-6 py-5 rounded-2xl transition active:scale-[0.98] ${
                   dailyTask.completed
-                    ? 'bg-emerald-50 dark:bg-emerald-950/40 ring-1 ring-emerald-100 dark:ring-emerald-900'
-                    : 'bg-gradient-to-br from-emerald-500 to-emerald-700 text-white shadow-lg shadow-emerald-600/25'
+                    ? 'bg-forest-50 dark:bg-forest-950/40 ring-1 ring-forest-100 dark:ring-forest-900'
+                    : 'bg-gradient-to-br from-forest-500 to-forest-700 text-white shadow-lg shadow-forest-600/25'
                 }`}
               >
                 <span className="font-semibold">Tagesaufgabe</span>
                 <span
                   className={`text-sm px-3 py-1 rounded-full font-medium ${
                     dailyTask.completed
-                      ? 'text-emerald-700 dark:text-emerald-300'
+                      ? 'text-forest-700 dark:text-forest-300'
                       : 'bg-white/20 text-white'
                   }`}
                 >
@@ -186,7 +186,7 @@ function App() {
 
             <div className="text-center py-6">
               <p className="text-6xl font-bold tracking-tight tabular-nums">{dueCards.length}</p>
-              <p className="mt-1 text-sm font-medium uppercase tracking-wider text-emerald-600 dark:text-emerald-400">fällig</p>
+              <p className="mt-1 text-sm font-medium uppercase tracking-wider text-forest-600 dark:text-forest-400">fällig</p>
             </div>
 
             <CategorySelector
@@ -198,7 +198,7 @@ function App() {
 
             <button
               onClick={handleStartStudy}
-              className="w-full py-4 rounded-2xl text-lg bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-medium shadow-lg shadow-emerald-600/25 transition"
+              className="w-full py-4 rounded-2xl text-lg bg-forest-600 hover:bg-forest-700 active:scale-[0.98] text-white font-medium shadow-lg shadow-forest-600/25 transition"
             >
               Start
             </button>
