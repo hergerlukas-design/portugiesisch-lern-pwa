@@ -189,8 +189,6 @@ function App() {
               <p className="mt-1 text-gray-500 dark:text-gray-400">fällig</p>
             </div>
 
-            <Segmented options={LEVELS} value={level} onChange={handleLevelChange} />
-
             <CategorySelector
               selectedCategory={selectedCategory}
               onCategoryChange={setSelectedCategory}
@@ -220,7 +218,16 @@ function App() {
         )}
 
         {currentMode === 'stats' && (
-          <StatsComponent stats={stats} onReset={resetAllProgress} />
+          <StatsComponent
+            stats={stats}
+            onReset={resetAllProgress}
+            settings={
+              <div>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">Niveau</p>
+                <Segmented options={LEVELS} value={level} onChange={handleLevelChange} />
+              </div>
+            }
+          />
         )}
       </main>
     </div>

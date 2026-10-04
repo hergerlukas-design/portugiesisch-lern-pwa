@@ -4,9 +4,11 @@ import type { Stats } from '../types';
 interface StatsProps {
   stats: Stats;
   onReset?: () => void;
+  // Settings shown below the numbers, above the reset link
+  settings?: React.ReactNode;
 }
 
-export const StatsComponent: React.FC<StatsProps> = ({ stats, onReset }) => {
+export const StatsComponent: React.FC<StatsProps> = ({ stats, onReset, settings }) => {
   const total = Math.max(stats.totalCards, 1);
 
   const metrics = [
@@ -61,6 +63,8 @@ export const StatsComponent: React.FC<StatsProps> = ({ stats, onReset }) => {
           ))}
         </ul>
       </div>
+
+      {settings}
 
       {onReset && (
         <button
