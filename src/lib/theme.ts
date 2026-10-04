@@ -5,8 +5,8 @@ const THEME_KEY = 'theme';
 
 const darkQuery = () => window.matchMedia('(prefers-color-scheme: dark)');
 
-// Browser/status bar color, matching the header background (shell-100 / slate-950)
-const BAR_COLOR = { light: '#f6f2e8', dark: '#020617' };
+// Browser/status bar color, matching the page ground (ground / ground-dark in index.css)
+const BAR_COLOR = { light: '#eef1ea', dark: '#0b1410' };
 
 export function loadTheme(): Theme {
   try {
