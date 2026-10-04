@@ -5,6 +5,9 @@ const THEME_KEY = 'theme';
 
 const darkQuery = () => window.matchMedia('(prefers-color-scheme: dark)');
 
+// Browser/status bar color, matching the header background (shell-100 / slate-950)
+const BAR_COLOR = { light: '#f6f2e8', dark: '#020617' };
+
 export function loadTheme(): Theme {
   try {
     const stored = localStorage.getItem(THEME_KEY);
@@ -31,6 +34,9 @@ export function applyTheme(theme: Theme): () => void {
   const update = () => {
     const dark = theme === 'dark' || (theme === 'system' && darkQuery().matches);
     document.documentElement.classList.toggle('dark', dark);
+    document
+      .querySelector('meta[name="theme-color"]')
+      ?.setAttribute('content', dark ? BAR_COLOR.dark : BAR_COLOR.light);
   };
   update();
   if (theme !== 'system') return () => {};

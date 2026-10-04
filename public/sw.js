@@ -3,7 +3,7 @@
  * Enables offline functionality with cache-first strategy
  */
 
-const CACHE_VERSION = 'v2';
+const CACHE_VERSION = 'v3';
 const CACHE_NAME = `portugiesisch-lernen-${CACHE_VERSION}`;
 
 // Assets to cache on install
@@ -65,9 +65,13 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Network first for page loads (so new deploys show up) and API requests;
-  // the cache is only the offline fallback
-  if (request.mode === 'navigate' || request.url.includes('/api/')) {
+  // Network first for page loads and the manifest (so new deploys and app colors show up)
+  // and API requests; the cache is only the offline fallback
+  if (
+    request.mode === 'navigate' ||
+    request.url.endsWith('/manifest.json') ||
+    request.url.includes('/api/')
+  ) {
     event.respondWith(
       fetch(request)
         .then((response) => {
