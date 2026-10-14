@@ -7,6 +7,7 @@ interface StudyModeProps {
   cards: Card[];
   direction: Direction;
   level: Level;
+  showPronunciation: boolean;
   // Cards not answered correctly go back to the end of the queue until every card was
   repeatUntilCorrect?: boolean;
   onCardComplete: (wordId: string, outcome: Outcome, userAnswer: string) => void;
@@ -19,6 +20,7 @@ export const StudyMode: React.FC<StudyModeProps> = ({
   cards,
   direction,
   level,
+  showPronunciation,
   repeatUntilCorrect = false,
   onCardComplete,
   onComplete,
@@ -144,6 +146,7 @@ export const StudyMode: React.FC<StudyModeProps> = ({
         word={word}
         direction={direction}
         level={level}
+        showPronunciation={showPronunciation}
         onSubmit={handleCardComplete}
       />
     </div>

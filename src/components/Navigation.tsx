@@ -1,13 +1,13 @@
 import React from 'react';
 
-type Mode = 'home' | 'stats' | 'settings';
+type Mode = 'home' | 'stats' | 'pronunciation' | 'settings';
 
 interface NavigationProps {
   currentMode: Mode;
   onModeChange: (mode: Mode) => void;
 }
 
-const TABS: { mode: 'home' | 'stats'; label: string; icon: React.ReactNode }[] = [
+const TABS: { mode: Exclude<Mode, 'settings'>; label: string; icon: React.ReactNode }[] = [
   {
     mode: 'home',
     label: 'Lernen',
@@ -30,6 +30,20 @@ const TABS: { mode: 'home' | 'stats'; label: string; icon: React.ReactNode }[] =
       </>
     ),
   },
+  {
+    mode: 'pronunciation',
+    label: 'Aussprache',
+    icon: (
+      <>
+        <path d="M2 10v3" />
+        <path d="M6 6v11" />
+        <path d="M10 3v18" />
+        <path d="M14 8v7" />
+        <path d="M18 5v13" />
+        <path d="M22 10v3" />
+      </>
+    ),
+  },
 ];
 
 // Floating glass tab bar at the bottom of the screen
@@ -38,7 +52,7 @@ export const Navigation: React.FC<NavigationProps> = ({ currentMode, onModeChang
     aria-label="Hauptnavigation"
     className="fixed inset-x-0 bottom-0 z-20 px-3.5 pb-[max(1.375rem,env(safe-area-inset-bottom))]"
   >
-    <div className="glass max-w-md mx-auto grid grid-cols-2 gap-2 p-1.5 rounded-[22px]">
+    <div className="glass max-w-md mx-auto grid grid-cols-3 gap-1.5 p-1.5 rounded-[22px]">
       {TABS.map(({ mode, label, icon }) => {
         const active = currentMode === mode;
         return (
@@ -46,7 +60,7 @@ export const Navigation: React.FC<NavigationProps> = ({ currentMode, onModeChang
             key={mode}
             onClick={() => onModeChange(mode)}
             aria-current={active ? 'page' : undefined}
-            className={`h-12 rounded-2xl flex items-center justify-center gap-2 text-sm transition ${
+            className={`h-12 rounded-2xl flex items-center justify-center gap-1.5 text-[13px] transition ${
               active
                 ? 'glass-active font-bold text-forest-800 dark:text-forest-200'
                 : 'font-semibold text-muted dark:text-gray-300 hover:text-ink dark:hover:text-white'

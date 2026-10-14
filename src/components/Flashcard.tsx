@@ -1,17 +1,20 @@
 import React, { useState, useRef, useEffect } from 'react';
 import type { Direction, Level, Outcome, Word } from '../types';
 import { buildChoices } from '../lib/choices';
+import { getPronunciation } from '../data/pronunciation';
 
 interface FlashcardProps {
   word: Word;
   direction: Direction;
   // beginner: pick from 4 options; advanced: type the answer
   level: Level;
+  // Show the transcription under the Portuguese word
+  showPronunciation: boolean;
   // again: the user asked to see this card again later in the session
   onSubmit: (outcome: Outcome, again: boolean, userAnswer: string) => void;
 }
 
-export const Flashcard: React.FC<FlashcardProps> = ({ word, direction, level, onSubmit }) => {
+export const Flashcard: React.FC<FlashcardProps> = ({ word, direction, level, showPronunciation, onSubmit }) => {
   const [flipped, setFlipped] = useState(false);
   // Once the answer has been seen, the card can be flipped back and forth freely
   const [revealed, setRevealed] = useState(false);
@@ -30,6 +33,7 @@ export const Flashcard: React.FC<FlashcardProps> = ({ word, direction, level, on
   const answer = ptFirst ? word.german : word.portuguese;
   const promptExample = word.exampleSentence?.[ptFirst ? 'portuguese' : 'german'];
   const answerExample = word.exampleSentence?.[ptFirst ? 'german' : 'portuguese'];
+  const pronunciation = showPronunciation ? getPronunciation(word.portuguese) : undefined;
 
   // The user's own answer: the picked option (beginner) or the typed text (advanced)
   const given = level === 'beginner' ? (chosen ?? '') : userAnswer;
@@ -81,6 +85,13 @@ export const Flashcard: React.FC<FlashcardProps> = ({ word, direction, level, on
     </span>
   );
 
+  // Shown under the word on whichever side is Portuguese
+  const pronunciationLine = pronunciation && (
+    <p className="mt-3 text-[17px] font-semibold tracking-wide text-muted dark:text-gray-300" aria-label={`Aussprache: ${pronunciation}`}>
+      [{pronunciation}]
+    </p>
+  );
+
   return (
     <div className="space-y-5">
       <button
@@ -96,6 +107,7 @@ export const Flashcard: React.FC<FlashcardProps> = ({ word, direction, level, on
             {flipHint}
             <div className="text-center px-6">
               <p className="font-display font-extrabold text-[44px] leading-none tracking-tight text-ink dark:text-white">{prompt}</p>
+              {ptFirst && pronunciationLine}
               {promptExample && (
                 <p className="mt-5 text-sm font-medium text-muted dark:text-gray-300">{promptExample}</p>
               )}
@@ -108,6 +120,7 @@ export const Flashcard: React.FC<FlashcardProps> = ({ word, direction, level, on
             {flipHint}
             <div className="text-center px-6">
               <p className="font-display font-bold text-[40px] leading-none tracking-tight text-forest-600 dark:text-forest-300">{answer}</p>
+              {!ptFirst && pronunciationLine}
               {answerExample && (
                 <p className="mt-5 text-sm font-medium text-muted dark:text-gray-300">{answerExample}</p>
               )}

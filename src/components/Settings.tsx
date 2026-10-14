@@ -7,6 +7,8 @@ interface SettingsProps {
   onLevelChange: (level: Level) => void;
   theme: Theme;
   onThemeChange: (theme: Theme) => void;
+  showPronunciation: boolean;
+  onShowPronunciationChange: (show: boolean) => void;
   onReset: () => void;
   onResetDaily: () => void;
 }
@@ -14,6 +16,11 @@ interface SettingsProps {
 const LEVELS: { id: Level; label: string }[] = [
   { id: 'beginner', label: 'Anfänger' },
   { id: 'advanced', label: 'Fortgeschritten' },
+];
+
+const PRONUNCIATION_OPTIONS: { id: 'on' | 'off'; label: string }[] = [
+  { id: 'on', label: 'An' },
+  { id: 'off', label: 'Aus' },
 ];
 
 const THEMES: { id: Theme; label: string }[] = [
@@ -27,6 +34,8 @@ export const Settings: React.FC<SettingsProps> = ({
   onLevelChange,
   theme,
   onThemeChange,
+  showPronunciation,
+  onShowPronunciationChange,
   onReset,
   onResetDaily,
 }) => {
@@ -68,6 +77,17 @@ export const Settings: React.FC<SettingsProps> = ({
         <p className="text-xs font-medium text-muted dark:text-gray-300">
           {level === 'beginner' ? '4 Antworten zur Auswahl' : 'Antwort selbst eintippen'}
         </p>
+      </section>
+
+      <section className="glass rounded-3xl p-[18px] space-y-3">
+        <h2 className="m-0 text-[13px] font-bold tracking-[0.06em] uppercase text-muted dark:text-gray-300">Lautschrift</h2>
+        <Segmented
+          options={PRONUNCIATION_OPTIONS}
+          value={showPronunciation ? 'on' : 'off'}
+          onChange={(value) => onShowPronunciationChange(value === 'on')}
+          label="Lautschrift"
+        />
+        <p className="text-xs font-medium text-muted dark:text-gray-300">Aussprache unter dem portugiesischen Wort, z. B. [ka-FÄ]</p>
       </section>
 
       <section className="glass rounded-3xl p-[18px] space-y-3">
