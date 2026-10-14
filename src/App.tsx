@@ -6,6 +6,7 @@ import { DirectionToggle } from './components/DirectionToggle';
 import { StudyMode } from './components/StudyMode';
 import { StatsComponent } from './components/Stats';
 import { Settings } from './components/Settings';
+import { Pronunciation } from './components/Pronunciation';
 import { useProgress } from './lib/useProgress';
 import { applyTheme, loadTheme, saveTheme } from './lib/theme';
 import {
@@ -36,6 +37,7 @@ const LEVEL_LABELS: { id: Level; label: string }[] = [
   { id: 'advanced', label: 'Fortgeschritten' },
 ];
 const LEVEL_KEY = 'studyLevel';
+const PRONUNCIATION_KEY = 'showPronunciation';
 
 // Saved choice if it is one of `allowed`, else the first allowed value
 function loadSetting<T extends string>(key: string, allowed: T[]): T {
@@ -56,7 +58,7 @@ function saveSetting(key: string, value: string) {
 }
 
 function App() {
-  const [currentMode, setCurrentMode] = useState<'home' | 'study' | 'stats' | 'settings'>('home');
+  const [currentMode, setCurrentMode] = useState<'home' | 'study' | 'stats' | 'pronunciation' | 'settings'>('home');
   const [selectedCategory, setSelectedCategory] = useState<Category>('top100');
   // Cards of the running session, fixed at start so ratings don't reshuffle it
   const [session, setSession] = useState<{ cards: Card[]; daily: boolean; level: Level } | null>(null);
@@ -69,6 +71,15 @@ function App() {
   const [level, setLevel] = useState<Level>(() =>
     loadSetting<Level>(LEVEL_KEY, ['beginner', 'advanced'])
   );
+
+  const [showPronunciation, setShowPronunciation] = useState(
+    () => loadSetting(PRONUNCIATION_KEY, ['on', 'off']) === 'on'
+  );
+
+  const handleShowPronunciationChange = (show: boolean) => {
+    setShowPronunciation(show);
+    saveSetting(PRONUNCIATION_KEY, show ? 'on' : 'off');
+  };
 
   const handleDirectionChange = (newDirection: Direction) => {
     setDirection(newDirection);
@@ -311,6 +322,7 @@ function App() {
             cards={session.cards}
             direction={direction}
             level={session.level}
+            showPronunciation={showPronunciation}
             repeatUntilCorrect={session.daily}
             onCardComplete={handleCardComplete}
             onComplete={handleDailyComplete}
@@ -326,6 +338,13 @@ function App() {
           </div>
         )}
 
+        {currentMode === 'pronunciation' && (
+          <div className="space-y-[18px]">
+            <ScreenHeader eyebrow="Português europeu" title="Aussprache" onSettings={() => setCurrentMode('settings')} />
+            <Pronunciation />
+          </div>
+        )}
+
         {currentMode === 'settings' && (
           <div className="space-y-[18px]">
             <ScreenHeader eyebrow="App" title="Einstellungen" settingsActive onSettings={() => setCurrentMode('home')} />
@@ -334,6 +353,8 @@ function App() {
               onLevelChange={handleLevelChange}
               theme={theme}
               onThemeChange={handleThemeChange}
+              showPronunciation={showPronunciation}
+              onShowPronunciationChange={handleShowPronunciationChange}
               onReset={resetAllProgress}
               onResetDaily={handleResetDaily}
             />
