@@ -163,6 +163,11 @@ export const Flashcard: React.FC<FlashcardProps> = ({ word, direction, level, sh
             type="text"
             value={userAnswer}
             onChange={(e) => setUserAnswer(e.target.value)}
+            // Fallback for browsers that overlay the keyboard instead of resizing the page
+            onFocus={(e) => {
+              const input = e.currentTarget;
+              setTimeout(() => input.scrollIntoView({ block: 'center', behavior: 'smooth' }), 300);
+            }}
             placeholder={ptFirst ? 'Auf Deutsch…' : 'Auf Portugiesisch…'}
             autoCapitalize="off"
             autoCorrect="off"
